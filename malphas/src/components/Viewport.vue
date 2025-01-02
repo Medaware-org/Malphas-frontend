@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
-import CircuitRenderer from "@/services/renderer.ts";
+import {CircuitRenderer} from "@/services/renderer.ts";
 
 const canvas = ref<HTMLCanvasElement | undefined>(undefined);
 const renderer = ref<CircuitRenderer | undefined>(undefined);
