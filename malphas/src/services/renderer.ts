@@ -75,6 +75,8 @@ export class CircuitRenderer {
         private viewportDragging: boolean = false;
         private mousePosition: [number, number] = [0, 0];
 
+        private gridUnit: number = 0;
+
         private testCircuit: NotCircuit = new NotCircuit(this, 0, 0);
 
         constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
@@ -100,14 +102,25 @@ export class CircuitRenderer {
 
         // Convert a point from world space to screen space coordinates
         public projectPoint(point: [number, number]): [number, number] {
-                // The same math as in the grid renderer
-                let dy = this.height / (this.vSubdivisions / this.viewportScale);
-                let dx = this.width / (((this.vSubdivisions / this.viewportScale)) * this.aspectRatio);
-
                 return [
-                        this.viewportPosition[0] + point[0] * dx,
-                        this.viewportPosition[1] + point[1] * dy
+                        this.viewportPosition[0] + point[0] * this.gridUnit,
+                        this.viewportPosition[1] + point[1] * this.gridUnit
                 ];
+        }
+
+        // Convert a point from screen space to world space
+        public unprojectPoint(point: [number, number], snap: boolean = false): [number, number] {
+                let world: [number, number] = [
+                        (point[0] - this.viewportPosition[0]) / this.gridUnit,
+                        (point[1] - this.viewportPosition[1]) / this.gridUnit
+                ];
+
+                if (!snap)
+                        return world;
+
+                world[0] = Math.round(world[0]);
+                world[1] = Math.round(world[0]);
+                return world;
         }
 
         private render() {
@@ -121,18 +134,19 @@ export class CircuitRenderer {
                 // We want the subdivision squares to be actual squares, so we need to take the AR into account
                 let adjVSubdivisions = this.vSubdivisions / this.viewportScale;
                 let hSubdivisions = adjVSubdivisions * this.aspectRatio;
-                let dy = this.height / adjVSubdivisions;
-                let dx = this.width / hSubdivisions;
+                let unitSize = this.height / adjVSubdivisions;
+
+                this.gridUnit = unitSize;
 
                 // Clamp the offset to the grid
-                let xOffset = this.viewportPosition[0] % dx
-                let yOffset = this.viewportPosition[1] % dy
+                let xOffset = this.viewportPosition[0] % unitSize
+                let yOffset = this.viewportPosition[1] % unitSize
 
                 let n: number;
                 for (n = 0; n < hSubdivisions + 2; n++)
-                        this.drawLine(n * dx + xOffset, yOffset - dy, xOffset + n * dx, this.height)
+                        this.drawLine(n * unitSize + xOffset, yOffset - unitSize, xOffset + n * unitSize, this.height)
                 for (n = 0; n < adjVSubdivisions + 1; n++)
-                        this.drawLine(xOffset - dx, yOffset + n * dy, xOffset + this.width + dx, yOffset + n * dy);
+                        this.drawLine(xOffset - unitSize, yOffset + n * unitSize, xOffset + this.width + unitSize, yOffset + n * unitSize);
 
                 this.testCircuit.render(this.context);
         }
