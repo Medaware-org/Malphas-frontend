@@ -3,9 +3,8 @@
 </script>
 
 <template>
-  <h1>Welcome</h1>
+  <button class="btn btn-primary">Button</button>
 </template>
 
 <style scoped>
-
 </style>
