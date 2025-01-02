@@ -9,8 +9,40 @@ servers:
 paths:
   /:
     get:
-      summary: Status
-      description: Status
+      tags:
+        - Status
+      operationId: statusEndpoint
+      summary: Status endpoint
+      description: Status endpoint
+      responses:
+        200:
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /login:
+    post:
+      tags:
+        - Authentication
+      operationId: login
+      summary: Login
+      description: Attempt to log in with the given credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
       responses:
         200:
           description: OK

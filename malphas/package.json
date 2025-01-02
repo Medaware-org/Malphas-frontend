@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "openapi-generate": "openapi-generator-cli generate -g typescript -i openapi/api.yaml -o src/api/"
+    "openapi-generate": "openapi-generator-cli generate -g typescript-rxjs -i openapi/api.yaml -o src/api/"
   },
   "dependencies": {
     "pinia": "^2.3.0",
