@@ -100,7 +100,10 @@ export class CircuitRenderer {
                 this.context.stroke();
         }
 
-        // Convert a point from world space to screen space coordinates
+        /**
+         * Convert a point from world space to screen space coordinates
+         * @param point - The world space point to project
+         */
         public projectPoint(point: [number, number]): [number, number] {
                 return [
                         this.viewportPosition[0] + point[0] * this.gridUnit,
@@ -108,7 +111,11 @@ export class CircuitRenderer {
                 ];
         }
 
-        // Convert a point from screen space to world space
+        /**
+         * Convert a point from screen space to world space
+         * @param point - The screen space point to un-project
+         * @param snap - Determines whether the point should be 'snapped' to the nearest grid (integer) boundary
+          */
         public unprojectPoint(point: [number, number], snap: boolean = false): [number, number] {
                 let world: [number, number] = [
                         (point[0] - this.viewportPosition[0]) / this.gridUnit,
