@@ -1,5 +1,4 @@
 .gitignore
-.openapi-generator-ignore
 apis/AuthenticationApi.ts
 apis/StatusApi.ts
 apis/index.ts
