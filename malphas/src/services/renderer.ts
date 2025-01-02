@@ -2,6 +2,9 @@ export default class CircuitRenderer {
         static readonly BACKGROUND_COLOR = '#1b1b1b';
         static readonly GRIDLINES_COLOR = '#3b3b3b';
 
+        static readonly MAX_ZOOM_LEVEL = 2.0;
+        static readonly MIN_ZOOM_LEVEL = 0.2;
+
         private canvas: HTMLCanvasElement;
         private context: CanvasRenderingContext2D;
 
@@ -16,7 +19,7 @@ export default class CircuitRenderer {
         private viewportPosition: [number, number] = [0, 0];
 
         private viewportDragging: boolean = false;
-        private mouseDragPosition: [number, number] = [0, 0];
+        private mousePosition: [number, number] = [0, 0];
 
         constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
                 this.canvas = canvas;
@@ -49,14 +52,12 @@ export default class CircuitRenderer {
                 // Clamp the offset to the grid
                 let xOffset = this.viewportPosition[0] % dx
                 let yOffset = this.viewportPosition[1] % dy
-
-                // TODO Implement overscan
-
+                
                 let n: number;
                 for (n = 0; n < hSubdivisions + 1; n++)
                         this.drawLine(n * dx + xOffset, +yOffset, xOffset + n * dx, this.height)
                 for (n = 0; n < adjVSubdivisions + 1; n++)
-                        this.drawLine(xOffset, yOffset + n * dy, xOffset + this.width, yOffset + n * dy);
+                        this.drawLine(xOffset, yOffset + n * dy, xOffset + this.width + dx, yOffset + n * dy);
         }
 
         private setupListeners() {
@@ -77,13 +78,29 @@ export default class CircuitRenderer {
                 })
 
                 window.addEventListener('wheel', (event: WheelEvent) => {
-                        this.viewportScale += event.deltaY / 100.0;
+                        this.viewportScale -= event.deltaY > 0 ? 0.1 : -0.1;
+
+                        if (this.viewportScale > CircuitRenderer.MAX_ZOOM_LEVEL)
+                                this.viewportScale = CircuitRenderer.MAX_ZOOM_LEVEL;
+
+                        if (this.viewportScale < CircuitRenderer.MIN_ZOOM_LEVEL)
+                                this.viewportScale = CircuitRenderer.MIN_ZOOM_LEVEL;
+
+                        if (event.deltaY < 0 && this.viewportScale < CircuitRenderer.MAX_ZOOM_LEVEL) {
+                                const relMousePosition: [number, number] = [
+                                        this.mousePosition[0] - (this.mousePosition[0] - this.viewportPosition[0]) * this.viewportScale,
+                                        this.mousePosition[1] - (this.mousePosition[1] - this.viewportPosition[1]) * this.viewportScale
+                                ];
+                                this.viewportPosition[0] = relMousePosition[0];
+                                this.viewportPosition[1] = relMousePosition[1];
+                        }
+
                         this.render();
                 })
 
                 window.addEventListener('mousedown', (event: MouseEvent) => {
                         this.viewportDragging = true;
-                        this.mouseDragPosition = [event.clientX, event.clientY];
+                        this.mousePosition = [event.clientX, event.clientY];
                 });
 
                 window.addEventListener('mouseup', (event: MouseEvent) => {
@@ -91,12 +108,13 @@ export default class CircuitRenderer {
                 });
 
                 window.addEventListener('mousemove', (event: MouseEvent) => {
+                        const mousePosition: [number, number] = [event.clientX, event.clientY];
+                        const delta = [mousePosition[0] - this.mousePosition[0], mousePosition[1] - this.mousePosition[1]];
+                        this.mousePosition = mousePosition;
+
                         if (!this.viewportDragging)
                                 return;
 
-                        const mousePosition: [number, number] = [event.clientX, event.clientY];
-                        const delta = [mousePosition[0] - this.mouseDragPosition[0], mousePosition[1] - this.mouseDragPosition[1]];
-                        this.mouseDragPosition = mousePosition;
                         this.viewportPosition[0] += delta[0];
                         this.viewportPosition[1] += delta[1];
                         this.render();
