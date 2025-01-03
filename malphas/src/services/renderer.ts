@@ -1,5 +1,3 @@
-import CircuitEditor from "@/views/CircuitEditor.vue";
-
 export abstract class CircuitElement {
         static readonly BACKGROUND_COLOR = '#37cdbe';
         static readonly CONTOUR_COLOR = '#27a89b';
@@ -38,7 +36,11 @@ export abstract class CircuitElement {
                 for (let point of [...geometry, geometry[0]]) {
                         if (point.length != 2)
                                 return;
-                        let projected = this.renderer.projectPoint(point as unknown as [number, number]);
+                        let absolutePoint = [
+                                point[0] + this.worldPosition[0],
+                                point[1] + this.worldPosition[1]
+                        ];
+                        let projected = this.renderer.projectPoint(absolutePoint as unknown as [number, number]);
                         if (first) {
                                 context.moveTo(...projected);
                                 first = false;
@@ -76,7 +78,12 @@ export abstract class CircuitElement {
                         if (conn.length != 2)
                                 continue;
 
-                        this.drawConnectionPoint(conn as unknown as [number, number])
+                        let absoluteConn = [
+                                conn[0] + this.worldPosition[0],
+                                conn[1] + this.worldPosition[1],
+                        ];
+
+                        this.drawConnectionPoint(absoluteConn as unknown as [number, number])
                 }
         }
 
@@ -93,7 +100,12 @@ export abstract class CircuitElement {
                         if (point.length != 2)
                                 continue;
 
-                        if (this.renderer.isWorldPointVisible(point as unknown as [number, number]))
+                        let absolutePoint = [
+                                point[0] + this.worldPosition[0],
+                                point[1] + this.worldPosition[1]
+                        ];
+
+                        if (this.renderer.isWorldPointVisible(absolutePoint as unknown as [number, number]))
                                 return true;
                 }
 
@@ -147,7 +159,7 @@ export class CircuitRenderer {
 
         private gridUnit: number = 0;
 
-        private testCircuit: NotCircuit = new NotCircuit(this, 0, 0);
+        private testCircuit: NotCircuit = new NotCircuit(this, -3, 0);
 
         constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
                 this.canvas = canvas;
