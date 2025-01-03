@@ -100,13 +100,20 @@ export class CircuitRenderer {
                 this.canvas = canvas;
                 this.context = context;
 
+                this.centerView(false);
+
+                this.setupListeners();
+                this.render();
+        }
+
+        public centerView(reRender: boolean = true) {
+                this.viewportScale = 1.0;
                 this.viewportPosition = [
                         window.innerWidth / 2,
                         window.innerHeight / 2,
                 ];
-
-                this.setupListeners();
-                this.render();
+                if (reRender)
+                        this.render();
         }
 
         private drawLine(fromX: number, fromY: number, toX: number, toY: number) {
@@ -195,12 +202,12 @@ export class CircuitRenderer {
                 updateDimensions()
 
                 // Re-render the view when the window (and thus the canvas) changes size
-                window.addEventListener('resize', (event: UIEvent) => {
+                this.canvas.addEventListener('resize', (event: UIEvent) => {
                         updateDimensions()
                         this.render();
                 })
 
-                window.addEventListener('wheel', (event: WheelEvent) => {
+                this.canvas.addEventListener('wheel', (event: WheelEvent) => {
                         this.viewportScale -= event.deltaY > 0 ? 0.02 : -0.02;
 
                         if (this.viewportScale > CircuitRenderer.MAX_ZOOM_LEVEL)
@@ -212,17 +219,17 @@ export class CircuitRenderer {
                         this.render();
                 })
 
-                window.addEventListener('mousedown', (event: MouseEvent) => {
+                this.canvas.addEventListener('mousedown', (event: MouseEvent) => {
                         this.viewportDragging = (event.button == 1);
                         this.mousePosition = [event.clientX, event.clientY];
                 });
 
-                window.addEventListener('mouseup', (event: MouseEvent) => {
+                this.canvas.addEventListener('mouseup', (event: MouseEvent) => {
                         if (event.button == 1)
                                 this.viewportDragging = false;
                 });
 
-                window.addEventListener('mousemove', (event: MouseEvent) => {
+                this.canvas.addEventListener('mousemove', (event: MouseEvent) => {
                         const mousePosition: [number, number] = [event.clientX, event.clientY];
                         const delta = [mousePosition[0] - this.mousePosition[0], mousePosition[1] - this.mousePosition[1]];
                         this.mousePosition = mousePosition;

@@ -12,6 +12,12 @@ onMounted(() => {
   renderer.value = new CircuitRenderer(canvasElement, context);
 })
 
+defineExpose({
+  recenter: () => {
+    renderer.value!!.centerView();
+  }
+})
+
 </script>
 
 <template>
