@@ -7,7 +7,7 @@ const sessionStore = useSessionStore();
 
 function signOut() {
   sessionStore.forgetToken();
-  router.push("/login");
+  router.push("/auth");
 }
 
 </script>

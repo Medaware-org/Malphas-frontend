@@ -1,21 +1,19 @@
 import {createRouter, createWebHistory} from 'vue-router'
-import LoginView from '../views/Login.vue'
 import CircuitEditor from "@/views/CircuitEditor.vue";
 import Dashboard from "@/views/Dashboard.vue";
-import Register from "@/views/Register.vue";
+import Authentication from "@/views/Authentication.vue";
 
 const router = createRouter({
         history: createWebHistory(import.meta.env.BASE_URL),
         routes: [
                 {
-                        path: '/login',
-                        name: 'login',
-                        component: LoginView,
+                        path: '/',
+                        redirect: '/auth'
                 },
                 {
-                        path: '/register',
-                        name: 'register',
-                        component: Register
+                        path: '/auth',
+                        name: 'auth',
+                        component: Authentication,
                 },
                 {
                         path: "/dash",

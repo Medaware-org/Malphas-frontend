@@ -138,8 +138,8 @@ enum PointerStatus {
 }
 
 export class CircuitRenderer {
-        static readonly BACKGROUND_COLOR = '#1b1b1b';
-        static readonly GRIDLINES_COLOR = '#3b3b3b';
+        static readonly BACKGROUND_COLOR = '#0A0A0A';
+        static readonly GRIDLINES_COLOR = '#1A1A1A';
         static readonly CURSOR_COLOR = '#ecf0f1';
 
         static readonly MAX_ZOOM_LEVEL = 2.0;
