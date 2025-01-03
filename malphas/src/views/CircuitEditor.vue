@@ -11,14 +11,30 @@ const recenterViewport = () => {
     viewportRef.value.recenter();
 };
 
+const zoomInViewport = () => {
+  if (viewportRef.value)
+    viewportRef.value.zoomIn();
+};
+
+const zoomOutViewport = () => {
+  if (viewportRef.value)
+    viewportRef.value.zoomOut();
+};
+
 </script>
 
 <template>
   <Viewport ref="viewportRef"></Viewport>
   <div id="button-overlay">
-    <div class="m-8 pointer-events-auto">
-      <button class="btn btn-secondary text-6xl" @click="recenterViewport">
-        <i class="fas fa-arrows"></i>
+    <div class="m-8 pointer-events-auto" id="button-container">
+      <button class="btn btn-primary text-6xl" @click="recenterViewport">
+        <i class="fas fa-arrows text-xl"></i>
+      </button>
+      <button class="btn btn-primary" @click="zoomInViewport">
+        <i class="fas fa-plus text-xl"></i>
+      </button>
+      <button class="btn btn-primary" @click="zoomOutViewport">
+        <i class="fas fa-minus text-xl"></i>
       </button>
     </div>
   </div>
@@ -29,7 +45,19 @@ const recenterViewport = () => {
   position: fixed;
   bottom: 0;
   left: 0;
-  width: 100%;
+  height: 100%;
   pointer-events: none;
+}
+
+#button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: start;
+  justify-content: center;
+}
+
+.btn {
+  display: block;
 }
 </style>

@@ -1,6 +1,6 @@
 export abstract class CircuitElement {
-        static readonly BACKGROUND_COLOR = '#6976ff';
-        static readonly CONTOUR_COLOR = '#4b59ed';
+        static readonly BACKGROUND_COLOR = '#37cdbe';
+        static readonly CONTOUR_COLOR = '#27a89b';
 
         public worldPosition: [number, number];
         protected renderer: CircuitRenderer;
@@ -72,6 +72,7 @@ export class NotCircuit extends CircuitElement {
 export class CircuitRenderer {
         static readonly BACKGROUND_COLOR = '#1b1b1b';
         static readonly GRIDLINES_COLOR = '#3b3b3b';
+        static readonly CURSOR_COLOR = '#ecf0f1';
 
         static readonly MAX_ZOOM_LEVEL = 2.0;
         static readonly MIN_ZOOM_LEVEL = 0.2;
@@ -91,6 +92,8 @@ export class CircuitRenderer {
 
         private viewportDragging: boolean = false;
         private mousePosition: [number, number] = [0, 0];
+
+        private mousePresent: boolean = true
 
         private gridUnit: number = 0;
 
@@ -114,6 +117,26 @@ export class CircuitRenderer {
                 ];
                 if (reRender)
                         this.render();
+        }
+
+        public zoomIn() {
+                this.zoom(-0.5);
+        }
+
+        public zoomOut() {
+                this.zoom(0.5);
+        }
+
+        private zoom(delta: number) {
+                this.viewportScale -= delta;
+
+                if (this.viewportScale > CircuitRenderer.MAX_ZOOM_LEVEL)
+                        this.viewportScale = CircuitRenderer.MAX_ZOOM_LEVEL;
+
+                if (this.viewportScale < CircuitRenderer.MIN_ZOOM_LEVEL)
+                        this.viewportScale = CircuitRenderer.MIN_ZOOM_LEVEL;
+
+                this.render();
         }
 
         private drawLine(fromX: number, fromY: number, toX: number, toY: number) {
@@ -158,7 +181,7 @@ export class CircuitRenderer {
                         return world;
 
                 world[0] = Math.round(world[0]);
-                world[1] = Math.round(world[0]);
+                world[1] = Math.round(world[1]);
                 return world;
         }
 
@@ -187,6 +210,23 @@ export class CircuitRenderer {
                 for (n = 0; n < adjVSubdivisions + 1; n++)
                         this.drawLine(xOffset - unitSize, yOffset + n * unitSize, xOffset + this.width + unitSize, yOffset + n * unitSize);
 
+                // Draw the cursor
+                if (this.mousePresent) {
+                        let snappedToGrid = this.unprojectPoint(this.mousePosition, true)
+                        let projected = this.projectPoint(snappedToGrid);
+                        this.context.strokeStyle = CircuitRenderer.CURSOR_COLOR;
+                        this.context.beginPath();
+                        this.context.moveTo(projected[0], projected[1] - this.gridUnit);
+                        this.context.lineTo(projected[0], projected[1] + this.gridUnit);
+                        this.context.closePath();
+                        this.context.stroke();
+                        this.context.beginPath();
+                        this.context.moveTo(projected[0] - this.gridUnit, projected[1]);
+                        this.context.lineTo(projected[0] + this.gridUnit, projected[1]);
+                        this.context.closePath();
+                        this.context.stroke();
+                }
+
                 this.testCircuit.drawGeometry(this.context);
         }
 
@@ -208,15 +248,7 @@ export class CircuitRenderer {
                 })
 
                 this.canvas.addEventListener('wheel', (event: WheelEvent) => {
-                        this.viewportScale -= event.deltaY > 0 ? 0.02 : -0.02;
-
-                        if (this.viewportScale > CircuitRenderer.MAX_ZOOM_LEVEL)
-                                this.viewportScale = CircuitRenderer.MAX_ZOOM_LEVEL;
-
-                        if (this.viewportScale < CircuitRenderer.MIN_ZOOM_LEVEL)
-                                this.viewportScale = CircuitRenderer.MIN_ZOOM_LEVEL;
-
-                        this.render();
+                        this.zoom(event.deltaY > 0 ? 0.02 : -0.02)
                 })
 
                 this.canvas.addEventListener('mousedown', (event: MouseEvent) => {
@@ -229,13 +261,25 @@ export class CircuitRenderer {
                                 this.viewportDragging = false;
                 });
 
+                this.canvas.addEventListener('mouseleave', (event: MouseEvent) => {
+                        this.mousePresent = false
+                        this.render()
+                })
+
+                this.canvas.addEventListener('mouseenter', (event: MouseEvent) => {
+                        this.mousePresent = true
+                        this.render()
+                })
+
                 this.canvas.addEventListener('mousemove', (event: MouseEvent) => {
                         const mousePosition: [number, number] = [event.clientX, event.clientY];
                         const delta = [mousePosition[0] - this.mousePosition[0], mousePosition[1] - this.mousePosition[1]];
                         this.mousePosition = mousePosition;
 
-                        if (!this.viewportDragging)
+                        if (!this.viewportDragging) {
+                                this.render();
                                 return;
+                        }
 
                         this.viewportPosition[0] += delta[0];
                         this.viewportPosition[1] += delta[1];

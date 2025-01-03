@@ -15,6 +15,12 @@ onMounted(() => {
 defineExpose({
   recenter: () => {
     renderer.value!!.centerView();
+  },
+  zoomIn: () => {
+    renderer.value!!.zoomIn();
+  },
+  zoomOut: () => {
+    renderer.value!!.zoomOut();
   }
 })
 
@@ -29,5 +35,6 @@ defineExpose({
   position: fixed;
   top: 0;
   left: 0;
+  cursor: none;
 }
 </style>
