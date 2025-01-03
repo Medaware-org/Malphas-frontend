@@ -50,3 +50,29 @@ paths:
             text/plain:
               schema:
                 type: string
+
+  /projects:
+    get:
+      tags:
+        - Project
+      operationId: listAllProjects
+      summary: Get All Projects
+      description: Get a list of all the projects of the current user
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    title:
+                      type: string
+                  required:
+                    - id
+                    - title

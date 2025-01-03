@@ -28,7 +28,7 @@ export abstract class CircuitElement {
 
                 context.fillStyle = CircuitElement.BACKGROUND_COLOR;
                 context.strokeStyle = CircuitElement.CONTOUR_COLOR;
-                context.lineWidth = 4;
+                context.lineWidth = 7;
 
                 context.beginPath();
 
@@ -72,7 +72,7 @@ export abstract class CircuitElement {
                         return;
 
                 context.strokeStyle = CircuitElement.CONNECTION_COLOR;
-                context.lineWidth = 10;
+                context.lineWidth = 5;
 
                 for (let conn of this.connections()) {
                         if (conn.length != 2)
@@ -131,6 +131,12 @@ export class NotCircuit extends CircuitElement {
         }
 }
 
+enum PointerStatus {
+        NONE,
+        ERROR,
+        OK
+}
+
 export class CircuitRenderer {
         static readonly BACKGROUND_COLOR = '#1b1b1b';
         static readonly GRIDLINES_COLOR = '#3b3b3b';
@@ -140,11 +146,12 @@ export class CircuitRenderer {
         static readonly MIN_ZOOM_LEVEL = 0.2;
 
         private canvas: HTMLCanvasElement;
-        private context: CanvasRenderingContext2D;
+        private readonly context: CanvasRenderingContext2D;
 
         private width: number = 0;
         private height: number = 0;
         private aspectRatio: number = 0;
+        private gridUnit: number = 0;
 
         // The vertical grid subdivisions at scale = 1.0
         private readonly vSubdivisions: number = 15;
@@ -157,7 +164,7 @@ export class CircuitRenderer {
 
         private mousePresent: boolean = true
 
-        private gridUnit: number = 0;
+        private pointerStatus: PointerStatus = PointerStatus.NONE;
 
         private testCircuit: NotCircuit = new NotCircuit(this, -3, 0);
 
@@ -272,24 +279,38 @@ export class CircuitRenderer {
                 for (n = 0; n < adjVSubdivisions + 1; n++)
                         this.drawLine(xOffset - unitSize, yOffset + n * unitSize, xOffset + this.width + unitSize, yOffset + n * unitSize);
 
+                this.testCircuit.draw(this.context)
+
                 // Draw the cursor
                 if (this.mousePresent) {
                         let snappedToGrid = this.unprojectPoint(this.mousePosition, true)
                         let projected = this.projectPoint(snappedToGrid);
+                        this.context.lineWidth = 1;
                         this.context.strokeStyle = CircuitRenderer.CURSOR_COLOR;
-                        this.context.beginPath();
-                        this.context.moveTo(projected[0], projected[1] - this.gridUnit);
-                        this.context.lineTo(projected[0], projected[1] + this.gridUnit);
-                        this.context.closePath();
-                        this.context.stroke();
-                        this.context.beginPath();
-                        this.context.moveTo(projected[0] - this.gridUnit, projected[1]);
-                        this.context.lineTo(projected[0] + this.gridUnit, projected[1]);
-                        this.context.closePath();
-                        this.context.stroke();
-                }
+                        this.drawLine(projected[0], projected[1] - this.gridUnit, projected[0], projected[1] + this.gridUnit);
+                        this.drawLine(projected[0] - this.gridUnit, projected[1], projected[0] + this.gridUnit, projected[1]);
 
-                this.testCircuit.draw(this.context)
+                        // Draw the cursor status indicator
+
+                        // Offset and Font size (scaled)
+                        let offsetSize = this.gridUnit / 2;
+
+                        if (this.pointerStatus != PointerStatus.NONE)
+                                this.context.font = Math.round(offsetSize) + 'px "FontAwesome"';
+
+                        let unicode: string | undefined = undefined;
+
+                        if (this.pointerStatus == PointerStatus.ERROR) {
+                                this.context.fillStyle = '#ff4f57';
+                                unicode = "\uf057";
+                        } else if (this.pointerStatus == PointerStatus.OK) {
+                                this.context.fillStyle = '#00a066';
+                                unicode = "\uf058";
+                        }
+
+                        if (unicode)
+                                this.context.fillText(unicode, projected[0] + offsetSize, projected[1] - offsetSize);
+                }
         }
 
         private setupListeners() {
@@ -310,7 +331,7 @@ export class CircuitRenderer {
                 })
 
                 this.canvas.addEventListener('wheel', (event: WheelEvent) => {
-                        this.zoom(event.deltaY > 0 ? 0.02 : -0.02)
+                        this.zoom(event.deltaY > 0 ? 0.03 : -0.03)
                 })
 
                 this.canvas.addEventListener('mousedown', (event: MouseEvent) => {

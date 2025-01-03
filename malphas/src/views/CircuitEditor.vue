@@ -26,16 +26,22 @@ const zoomOutViewport = () => {
 <template>
   <Viewport ref="viewportRef"></Viewport>
   <div id="button-overlay">
-    <div class="m-8 pointer-events-auto" id="button-container">
-      <button class="btn btn-primary text-6xl" @click="recenterViewport">
-        <i class="fas fa-arrows text-xl"></i>
-      </button>
-      <button class="btn btn-primary" @click="zoomInViewport">
-        <i class="fas fa-plus text-xl"></i>
-      </button>
-      <button class="btn btn-primary" @click="zoomOutViewport">
-        <i class="fas fa-minus text-xl"></i>
-      </button>
+    <div class="m-8 pointer-events-auto xl:flex-col flex-row" id="button-container">
+      <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Center View">
+        <button class="btn btn-primary btn-circle" @click="recenterViewport">
+          <i class="fas fa-arrows text-2xl"></i>
+        </button>
+      </div>
+      <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Zoom In">
+        <button class="btn btn-primary btn-circle" @click="zoomInViewport">
+          <i class="fas fa-plus text-2xl"></i>
+        </button>
+      </div>
+      <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Zoom Out">
+        <button class="btn btn-primary btn-circle" @click="zoomOutViewport">
+          <i class="fas fa-minus text-2xl"></i>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -51,7 +57,6 @@ const zoomOutViewport = () => {
 
 #button-container {
   display: flex;
-  flex-direction: column;
   gap: 20px;
   align-items: start;
   justify-content: center;

@@ -1,8 +1,10 @@
 .gitignore
 apis/AuthenticationApi.ts
+apis/ProjectApi.ts
 apis/StatusApi.ts
 apis/index.ts
 index.ts
+models/ListAllProjects200ResponseInner.ts
 models/LoginRequest.ts
 models/index.ts
 runtime.ts
