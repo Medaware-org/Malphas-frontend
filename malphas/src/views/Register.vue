@@ -22,18 +22,17 @@ onMounted(() => {
   }
 })
 
-function login() {
+function register() {
   errorBanner.value = false;
 
-  Api.auth.login({
+  Api.auth.register({
     credentialsDto: {
       username: username.value,
       password: password.value,
     }
   }).subscribe({
-    next: (token: string) => {
-      sessionStore.setToken(token);
-      router.push("/dash");
+    next: () => {
+      router.push("/login");
     },
     error(err: any) {
       error.value = err?.response?.description || "An unknown error occurred"
@@ -48,12 +47,12 @@ function login() {
   <div class="w-full h-screen flex items-center justify-center" id="background">
     <div class="sm:w-full xl:w-1/4">
       <div class="card bg-base-200 shadow-2xl">
-        <form @submit.prevent="login">
+        <form @submit.prevent="register">
           <div class="card-body">
-            <h2 class="card-title mb-5">Sign In</h2>
+            <h2 class="card-title mb-5">Register</h2>
             <input type="text" placeholder="Username" class="input input-bordered" v-model="username">
             <input type="password" placeholder="Password" class="input input-bordered mt-2" v-model="password">
-            <button :disabled="!isFormValid" type="submit" class="btn btn-primary mt-5">Login</button>
+            <button :disabled="!isFormValid" type="submit" class="btn btn-primary mt-5">Register</button>
           </div>
         </form>
       </div>

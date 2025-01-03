@@ -16,11 +16,15 @@ import type { AjaxResponse } from 'rxjs/ajax';
 import { BaseAPI, throwIfNullOrUndefined } from '../runtime';
 import type { OperationOpts, HttpHeaders } from '../runtime';
 import type {
-    LoginRequest,
+    CredentialsDto,
 } from '../models';
 
 export interface LoginRequest {
-    loginRequest: LoginRequest;
+    credentialsDto: CredentialsDto;
+}
+
+export interface RegisterRequest {
+    credentialsDto: CredentialsDto;
 }
 
 /**
@@ -32,10 +36,10 @@ export class AuthenticationApi extends BaseAPI {
      * Attempt to log in with the given credentials
      * Login
      */
-    login({ loginRequest }: LoginRequest): Observable<string>
-    login({ loginRequest }: LoginRequest, opts?: OperationOpts): Observable<AjaxResponse<string>>
-    login({ loginRequest }: LoginRequest, opts?: OperationOpts): Observable<string | AjaxResponse<string>> {
-        throwIfNullOrUndefined(loginRequest, 'loginRequest', 'login');
+    login({ credentialsDto }: LoginRequest): Observable<string>
+    login({ credentialsDto }: LoginRequest, opts?: OperationOpts): Observable<AjaxResponse<string>>
+    login({ credentialsDto }: LoginRequest, opts?: OperationOpts): Observable<string | AjaxResponse<string>> {
+        throwIfNullOrUndefined(credentialsDto, 'credentialsDto', 'login');
 
         const headers: HttpHeaders = {
             'Content-Type': 'application/json',
@@ -45,7 +49,28 @@ export class AuthenticationApi extends BaseAPI {
             url: '/login',
             method: 'POST',
             headers,
-            body: loginRequest,
+            body: credentialsDto,
+        }, opts?.responseOpts);
+    };
+
+    /**
+     * Register a new user
+     * register
+     */
+    register({ credentialsDto }: RegisterRequest): Observable<void>
+    register({ credentialsDto }: RegisterRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>>
+    register({ credentialsDto }: RegisterRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>> {
+        throwIfNullOrUndefined(credentialsDto, 'credentialsDto', 'register');
+
+        const headers: HttpHeaders = {
+            'Content-Type': 'application/json',
+        };
+
+        return this.request<void>({
+            url: '/register',
+            method: 'POST',
+            headers,
+            body: credentialsDto,
         }, opts?.responseOpts);
     };
 

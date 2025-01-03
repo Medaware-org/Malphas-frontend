@@ -16,7 +16,7 @@ import type { AjaxResponse } from 'rxjs/ajax';
 import { BaseAPI } from '../runtime';
 import type { OperationOpts } from '../runtime';
 import type {
-    ListAllProjects200ResponseInner,
+    Project,
 } from '../models';
 
 /**
@@ -28,10 +28,10 @@ export class ProjectApi extends BaseAPI {
      * Get a list of all the projects of the current user
      * Get All Projects
      */
-    listAllProjects(): Observable<Array<ListAllProjects200ResponseInner>>
-    listAllProjects(opts?: OperationOpts): Observable<AjaxResponse<Array<ListAllProjects200ResponseInner>>>
-    listAllProjects(opts?: OperationOpts): Observable<Array<ListAllProjects200ResponseInner> | AjaxResponse<Array<ListAllProjects200ResponseInner>>> {
-        return this.request<Array<ListAllProjects200ResponseInner>>({
+    listAllProjects(): Observable<Array<Project>>
+    listAllProjects(opts?: OperationOpts): Observable<AjaxResponse<Array<Project>>>
+    listAllProjects(opts?: OperationOpts): Observable<Array<Project> | AjaxResponse<Array<Project>>> {
+        return this.request<Array<Project>>({
             url: '/projects',
             method: 'GET',
         }, opts?.responseOpts);

@@ -1,7 +1,15 @@
 <script setup lang="ts">
-function signOut() {
 
+import {useSessionStore} from "@/stores/session.ts";
+import router from "@/router";
+
+const sessionStore = useSessionStore();
+
+function signOut() {
+  sessionStore.forgetToken();
+  router.push("/login");
 }
+
 </script>
 
 <template>

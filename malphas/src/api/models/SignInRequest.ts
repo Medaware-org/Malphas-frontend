@@ -13,17 +13,17 @@
 
 /**
  * @export
- * @interface ListAllProjects200ResponseInner
+ * @interface SignInRequest
  */
-export interface ListAllProjects200ResponseInner {
+export interface SignInRequest {
     /**
      * @type {string}
-     * @memberof ListAllProjects200ResponseInner
+     * @memberof SignInRequest
      */
-    id: string;
+    username: string;
     /**
      * @type {string}
-     * @memberof ListAllProjects200ResponseInner
+     * @memberof SignInRequest
      */
-    title: string;
+    password: string;
 }

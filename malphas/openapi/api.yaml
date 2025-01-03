@@ -34,15 +34,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-              required:
-                - username
-                - password
+              $ref: "#/components/schemas/credentialsDto"
       responses:
         200:
           description: OK
@@ -50,6 +42,23 @@ paths:
             text/plain:
               schema:
                 type: string
+
+  /register:
+    post:
+      tags:
+        - Authentication
+      operationId: register
+      summary: register
+      description: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/credentialsDto"
+      responses:
+        200:
+          description: OK
 
   /projects:
     get:
@@ -66,13 +75,28 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      format: uuid
-                    title:
-                      type: string
-                  required:
-                    - id
-                    - title
+                  $ref: "#/components/schemas/project"
+
+components:
+  schemas:
+    credentialsDto:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+    project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+      required:
+        - id
+        - title

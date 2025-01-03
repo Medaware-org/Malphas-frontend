@@ -4,8 +4,8 @@ apis/ProjectApi.ts
 apis/StatusApi.ts
 apis/index.ts
 index.ts
-models/ListAllProjects200ResponseInner.ts
-models/LoginRequest.ts
+models/CredentialsDto.ts
+models/Project.ts
 models/index.ts
 runtime.ts
 servers.ts

@@ -13,17 +13,17 @@
 
 /**
  * @export
- * @interface LoginRequest
+ * @interface CredentialsDto
  */
-export interface LoginRequest {
+export interface CredentialsDto {
     /**
      * @type {string}
-     * @memberof LoginRequest
+     * @memberof CredentialsDto
      */
     username: string;
     /**
      * @type {string}
-     * @memberof LoginRequest
+     * @memberof CredentialsDto
      */
     password: string;
 }
