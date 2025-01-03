@@ -10,9 +10,14 @@ export abstract class CircuitElement {
                 this.worldPosition = [x, y];
         }
 
-        abstract render(context: CanvasRenderingContext2D): void;
+        abstract geometry(): number[][];
 
-        drawGeometry(context: CanvasRenderingContext2D, geometry: number[][]): void {
+        drawGeometry(context: CanvasRenderingContext2D): void {
+                if (!this.isVisible())
+                        return;
+
+                let geometry = this.geometry();
+
                 // Invalid geometry
                 if (geometry.length < 3)
                         return;
@@ -40,15 +45,27 @@ export abstract class CircuitElement {
                 context.fill();
                 context.stroke();
         }
+
+        isVisible(): boolean {
+                for (let point of this.geometry()) {
+                        if (point.length != 2)
+                                continue;
+
+                        if (this.renderer.isWorldPointVisible(point as unknown as [number, number]))
+                                return true;
+                }
+
+                return false;
+        }
 }
 
 export class NotCircuit extends CircuitElement {
-        override render(context: CanvasRenderingContext2D): void {
-                this.drawGeometry(context, [
+        override geometry(): number[][] {
+                return [
                         [0, 2],
                         [4, 0],
                         [0, -2]
-                ])
+                ];
         }
 }
 
@@ -111,11 +128,19 @@ export class CircuitRenderer {
                 ];
         }
 
+        public isScreenPointVisible(point: [number, number]): boolean {
+                return point[0] >= 0 && point[0] < this.width && point[1] >= 0 && point[1] < this.height;
+        }
+
+        public isWorldPointVisible(point: [number, number]): boolean {
+                return this.isScreenPointVisible(this.projectPoint(point));
+        }
+
         /**
          * Convert a point from screen space to world space
          * @param point - The screen space point to un-project
          * @param snap - Determines whether the point should be 'snapped' to the nearest grid (integer) boundary
-          */
+         */
         public unprojectPoint(point: [number, number], snap: boolean = false): [number, number] {
                 let world: [number, number] = [
                         (point[0] - this.viewportPosition[0]) / this.gridUnit,
@@ -155,7 +180,7 @@ export class CircuitRenderer {
                 for (n = 0; n < adjVSubdivisions + 1; n++)
                         this.drawLine(xOffset - unitSize, yOffset + n * unitSize, xOffset + this.width + unitSize, yOffset + n * unitSize);
 
-                this.testCircuit.render(this.context);
+                this.testCircuit.drawGeometry(this.context);
         }
 
         private setupListeners() {
