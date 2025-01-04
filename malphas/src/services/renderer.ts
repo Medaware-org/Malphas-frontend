@@ -143,7 +143,7 @@ export class CircuitRenderer {
         static readonly CURSOR_COLOR = '#ecf0f1';
 
         static readonly MAX_ZOOM_LEVEL = 2.0;
-        static readonly MIN_ZOOM_LEVEL = 0.2;
+        static readonly MIN_ZOOM_LEVEL = 0.02;
 
         private canvas: HTMLCanvasElement;
         private readonly context: CanvasRenderingContext2D;
@@ -325,7 +325,7 @@ export class CircuitRenderer {
                 updateDimensions()
 
                 // Re-render the view when the window (and thus the canvas) changes size
-                this.canvas.addEventListener('resize', (event: UIEvent) => {
+                window.addEventListener('resize', (event: UIEvent) => {
                         updateDimensions()
                         this.render();
                 })
