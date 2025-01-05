@@ -92,6 +92,27 @@ paths:
         200:
           description: OK
 
+  /circuit:
+    post:
+      tags:
+        - Circuit
+      operationId: postCircuit
+      summary: Create a new circuit
+      description: Create a new circuit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/circuitCreationDto"
+      responses:
+        200:
+          description: OK
+        400:
+          description: InvalidCredentials
+        500:
+          description: InternalError
+
 components:
   schemas:
     credentialsDto:
@@ -143,3 +164,23 @@ components:
           type: string
       required:
         - token
+    circuitCreationDto:
+      type: object
+      properties:
+        parent_scene:
+          type: string
+          format: uuid
+        gateType:
+          type: string
+        location_x:
+          type: int
+        location_y:
+          type: int
+        parent_circuit:
+          type: string
+          format: uuid
+      required:
+        - parent_scene
+        - gateType
+        - location_x
+        - location_y
