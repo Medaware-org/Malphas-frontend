@@ -14,7 +14,7 @@
 import type { Observable } from 'rxjs';
 import type { AjaxResponse } from 'rxjs/ajax';
 import { BaseAPI, throwIfNullOrUndefined } from '../runtime';
-import type { OperationOpts, HttpHeaders } from '../runtime';
+import type { OperationOpts, HttpHeaders, HttpQuery } from '../runtime';
 import type {
     SceneCreationDto,
     SceneDto,
@@ -22,6 +22,10 @@ import type {
 
 export interface CreateSceneRequest {
     sceneCreationDto: SceneCreationDto;
+}
+
+export interface DeleteSceneRequest {
+    id?: string;
 }
 
 /**
@@ -47,6 +51,25 @@ export class ScenesApi extends BaseAPI {
             method: 'POST',
             headers,
             body: sceneCreationDto,
+        }, opts?.responseOpts);
+    };
+
+    /**
+     * Delete an existing scene
+     * Delete an existing scene
+     */
+    deleteScene({ id }: DeleteSceneRequest): Observable<void>
+    deleteScene({ id }: DeleteSceneRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>>
+    deleteScene({ id }: DeleteSceneRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>> {
+
+        const query: HttpQuery = {};
+
+        if (id != null) { query['id'] = id; }
+
+        return this.request<void>({
+            url: '/scene',
+            method: 'DELETE',
+            query,
         }, opts?.responseOpts);
     };
 

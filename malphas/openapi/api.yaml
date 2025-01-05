@@ -91,6 +91,21 @@ paths:
       responses:
         200:
           description: OK
+    delete:
+      tags:
+        - Scenes
+      operationId: deleteScene
+      summary: Delete an existing scene
+      description: Delete an existing scene
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: OK
 
   /circuit:
     post:
