@@ -4,7 +4,10 @@ import {ref, computed, onMounted} from 'vue';
 import {useSessionStore} from "@/stores/session.ts";
 import router from "@/router";
 import {Api} from "@/services/api.ts";
+import {ExclamationCircleIcon} from '@heroicons/vue/24/outline';
+import '@/services/errorParser.ts';
 import type {TokenDto} from "@/api";
+import retrieveErrorDto from "@/services/errorParser.ts";
 
 const sessionStore = useSessionStore()
 
@@ -39,7 +42,7 @@ function login() {
       router.push("/dash")
     },
     error(err: any) {
-      errorMessage.value = err?.response?.description || "An unknown error occurred"
+      errorMessage.value = retrieveErrorDto(err).description;
       errorOccurred.value = true;
     }
   })
@@ -59,7 +62,7 @@ function register() {
       cleanup();
     },
     error(err: any) {
-      errorMessage.value = err?.response?.description || "An unknown error occurred"
+      errorMessage.value = retrieveErrorDto(err).description;
       errorOccurred.value = true;
     }
   })
@@ -109,17 +112,7 @@ function cleanup() {
         </div>
       </div>
       <div role="alert" class="alert alert-error mt-5" v-if="errorOccurred">
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6 shrink-0 stroke-current"
-            fill="none"
-            viewBox="0 0 24 24">
-          <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
+        <ExclamationCircleIcon class="size-6"></ExclamationCircleIcon>
         <span>{{ errorMessage }}</span>
       </div>
     </div>

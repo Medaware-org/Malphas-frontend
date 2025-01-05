@@ -6,7 +6,7 @@ import {
   ArrowRightStartOnRectangleIcon,
   PencilIcon,
   TrashIcon,
-  Cog8ToothIcon
+  Cog8ToothIcon, ExclamationCircleIcon
 } from '@heroicons/vue/24/outline';
 import {computed, ref} from 'vue';
 import {useSessionStore} from "@/stores/session.ts";
@@ -15,7 +15,9 @@ import {onMounted} from "vue";
 import {useScenesStore} from "@/stores/scenes.ts";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
 import {Api} from "@/services/api.ts";
+import '@/services/errorParser.ts';
 import type {SceneDto} from "@/api";
+import retrieveErrorDto from "@/services/errorParser.ts";
 
 onMounted(() => {
   reloadScenes();
@@ -32,6 +34,18 @@ const newSceneDescription = ref('')         // } and edit dialogues
 const deleteSceneDialog = ref<HTMLDialogElement>()
 const targetScene = ref<SceneDto | undefined>(undefined) // Both for deleting and updating
 
+const errorOccurred = ref(false)
+const errorMessage = ref('')
+
+function error(message: string) {
+  errorMessage.value = message;
+  errorOccurred.value = true;
+}
+
+function clearError() {
+  errorOccurred.value = false;
+}
+
 function signOut() {
   sessionStore.forgetToken();
   router.push("/auth");
@@ -42,7 +56,10 @@ const isCreateOrUpdateFormValid = computed(() => {
 })
 
 function reloadScenes() {
-  sceneStore.reloadScenes();
+  clearError();
+  sceneStore.reloadScenes((err) => {
+    error(retrieveErrorDto(err).description)
+  });
 }
 
 function clearFormModel() {
@@ -79,7 +96,7 @@ function deleteScene(shouldDelete: boolean) {
       reloadScenes();
     },
     error: (err) => {
-      // TODO Show error somehow
+      error(retrieveErrorDto(err).description)
     }
   })
 }
@@ -100,7 +117,7 @@ function createScene(shouldCreate: boolean) {
       reloadScenes();
     },
     error: (err) => {
-      // TODO Show error feedback
+      error(retrieveErrorDto(err).description)
     }
   })
 }
@@ -122,7 +139,7 @@ function updateScene(shouldUpdate: boolean) {
       reloadScenes();
     },
     error: (err) => {
-      // TODO Show error
+      error(retrieveErrorDto(err).description)
     }
   })
 }
@@ -189,6 +206,15 @@ function updateScene(shouldUpdate: boolean) {
     <h1>Scenes</h1>
   </div>
 
+  <div class="flex flex-row justify-center items-center mt-5 mb-5" v-if="errorOccurred">
+    <div class="w-1/2">
+      <div role="alert" class="alert alert-error">
+        <ExclamationCircleIcon class="size-6"></ExclamationCircleIcon>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+  </div>
+
   <LoadingIndicator v-if="sceneStore.loading"></LoadingIndicator>
 
   <div class="flex flex-row lg:justify-start justify-center gap-10 mx-10 flex-wrap" v-if="!sceneStore.loading">
@@ -205,7 +231,8 @@ function updateScene(shouldUpdate: boolean) {
     <!-- The scene creation card -->
     <div
         class="card min-w-72 h-48 select-none bg-neutral-900 hover:bg-neutral-700 border-slate-400 border-solid border new-scene-card"
-        @click="showCreationDialog">
+        @click="showCreationDialog"
+        v-if="!errorOccurred">
       <div class="card-body flex items-center justify-center">
         <PlusIcon class="size-10"></PlusIcon>
         <span>New Scene</span>
@@ -214,7 +241,8 @@ function updateScene(shouldUpdate: boolean) {
 
     <!-- Scene cards -->
     <div class="card min-w-72 h-48 bg-neutral-900 border-slate-400 border-solid border"
-         v-for="scene in sceneStore.scenes">
+         v-for="scene in sceneStore.scenes"
+         v-if="!errorOccurred">
       <div class="card-body">
         <h2 class="card-title">
           {{ scene.name }}
@@ -222,17 +250,17 @@ function updateScene(shouldUpdate: boolean) {
         <p>{{ scene.description }}</p>
         <div class="card-actions mt-5">
           <div class="tooltip flex-1 tooltip-bottom" data-tip="Delete Scene" @click="showDeleteDialog(scene)">
-            <button class="btn btn-error w-full btn-outline text-error">
+            <button class="btn btn-error w-full btn-outline">
               <TrashIcon class="size-5 inline"></TrashIcon>
             </button>
           </div>
           <div class="tooltip flex-1 tooltip-bottom" data-tip="Edit Details" @click="showUpdateDialog(scene)">
-            <button class="btn btn-accent w-full btn-outline text-accent">
+            <button class="btn btn-accent w-full btn-outline">
               <Cog8ToothIcon class="size-5 inline"></Cog8ToothIcon>
             </button>
           </div>
           <div class="tooltip flex-1 tooltip-bottom" data-tip="Open in Editor">
-            <button class="btn btn-warning w-full btn-outline text-accent">
+            <button class="btn btn-info w-full btn-outline">
               <PencilIcon class="size-5 inline"></PencilIcon>
             </button>
           </div>

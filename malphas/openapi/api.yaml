@@ -345,3 +345,13 @@ components:
         - amount_input
         - amount_output
         - location
+    errorDto:
+      type: object
+      properties:
+        summary:
+          type: string
+        description:
+          type: string
+      required:
+        - summary
+        - description

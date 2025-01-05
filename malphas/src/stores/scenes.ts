@@ -6,7 +6,7 @@ export const useScenesStore = defineStore("scenes", {
         state: () => ({scenes: [] as SceneDto[], loading: false}),
 
         actions: {
-                reloadScenes() {
+                reloadScenes(errorCallback: (err) => void) {
                         this.loading = true;
                         Api.scene.listAllScenes().subscribe({
                                 next: (scenes: SceneDto[]) => {
@@ -16,6 +16,7 @@ export const useScenesStore = defineStore("scenes", {
                                 error: (err) => {
                                         this.scenes = [];
                                         this.loading = false;
+                                        errorCallback(err)
                                 }
                         })
                 }

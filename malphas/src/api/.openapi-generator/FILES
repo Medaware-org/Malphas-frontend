@@ -9,6 +9,7 @@ index.ts
 models/CircuitCreationDto.ts
 models/CircuitDto.ts
 models/CredentialsDto.ts
+models/ErrorDto.ts
 models/SceneCreationDto.ts
 models/SceneDto.ts
 models/SceneUpdateDto.ts
