@@ -20,7 +20,7 @@ class AuthorizationMiddleware implements Middleware {
 }
 
 const apiConfig = new Configuration({
-        basePath: window.location.origin.replace("5173", "1234"),
+        basePath: window.location.origin.replace("5173", "1234"), // TODO Change this for prod
         middleware: [new AuthorizationMiddleware()]
 });
 

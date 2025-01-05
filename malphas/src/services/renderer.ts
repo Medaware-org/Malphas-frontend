@@ -289,27 +289,6 @@ export class CircuitRenderer {
                         this.context.strokeStyle = CircuitRenderer.CURSOR_COLOR;
                         this.drawLine(projected[0], projected[1] - this.gridUnit, projected[0], projected[1] + this.gridUnit);
                         this.drawLine(projected[0] - this.gridUnit, projected[1], projected[0] + this.gridUnit, projected[1]);
-
-                        // Draw the cursor status indicator
-
-                        // Offset and Font size (scaled)
-                        let offsetSize = this.gridUnit / 2;
-
-                        if (this.pointerStatus != PointerStatus.NONE)
-                                this.context.font = Math.round(offsetSize) + 'px "FontAwesome"';
-
-                        let unicode: string | undefined = undefined;
-
-                        if (this.pointerStatus == PointerStatus.ERROR) {
-                                this.context.fillStyle = '#ff4f57';
-                                unicode = "\uf057";
-                        } else if (this.pointerStatus == PointerStatus.OK) {
-                                this.context.fillStyle = '#00a066';
-                                unicode = "\uf058";
-                        }
-
-                        if (unicode)
-                                this.context.fillText(unicode, projected[0] + offsetSize, projected[1] - offsetSize);
                 }
         }
 
