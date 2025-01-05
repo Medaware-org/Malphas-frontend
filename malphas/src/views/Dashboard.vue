@@ -95,7 +95,7 @@ function deleteScene(shouldDelete: boolean) {
     next: () => {
       reloadScenes();
     },
-    error: (err) => {
+    error: (err: any) => {
       error(retrieveErrorDto(err).description)
     }
   })
@@ -116,7 +116,7 @@ function createScene(shouldCreate: boolean) {
     next: () => {
       reloadScenes();
     },
-    error: (err) => {
+    error: (err: any) => {
       error(retrieveErrorDto(err).description)
     }
   })
@@ -138,10 +138,15 @@ function updateScene(shouldUpdate: boolean) {
     next: () => {
       reloadScenes();
     },
-    error: (err) => {
+    error: (err: any) => {
       error(retrieveErrorDto(err).description)
     }
   })
+}
+
+function openInEditor(scene: SceneDto) {
+  sceneStore.selectScene(scene)
+  router.push("/editor")
 }
 
 </script>
@@ -259,7 +264,7 @@ function updateScene(shouldUpdate: boolean) {
               <Cog8ToothIcon class="size-5 inline"></Cog8ToothIcon>
             </button>
           </div>
-          <div class="tooltip flex-1 tooltip-bottom" data-tip="Open in Editor">
+          <div class="tooltip flex-1 tooltip-bottom" data-tip="Open in Editor" @click="openInEditor(scene)">
             <button class="btn btn-info w-full btn-outline">
               <PencilIcon class="size-5 inline"></PencilIcon>
             </button>
