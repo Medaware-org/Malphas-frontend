@@ -112,6 +112,21 @@ paths:
           description: InvalidCredentials
         500:
           description: InternalError
+    get:
+      tags:
+        - Circuit
+      operationId: listAllCircuits
+      summary: Get All Circuits
+      description: Get all circuits
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/circuitDto"
 
   /wire:
     post:
@@ -201,6 +216,30 @@ components:
         - gateType
         - location_x
         - location_y
+    circuitDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        parent_scene:
+          type: string
+          format: uuid
+        location_x:
+          type: int
+        location_y:
+          type: int
+        parent_circuit:
+          type: string
+          format: uuid
+        gate_type:
+          type: string
+      required:
+        - id
+        - parent_scene
+        - location_x
+        - location_y
+        - gate_type
     wireCreationDto:
       type: object
       properties:
