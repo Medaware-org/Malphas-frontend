@@ -20,11 +20,6 @@ export interface SceneCreationDto {
      * @type {string}
      * @memberof SceneCreationDto
      */
-    author: string;
-    /**
-     * @type {string}
-     * @memberof SceneCreationDto
-     */
     name: string;
     /**
      * @type {string}

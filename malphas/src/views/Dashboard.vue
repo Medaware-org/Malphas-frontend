@@ -7,21 +7,29 @@ import {
   PencilIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline';
-import {ref} from 'vue';
+import {computed, ref} from 'vue';
 import {useSessionStore} from "@/stores/session.ts";
 import router from "@/router";
 import {onMounted} from "vue";
 import {useScenesStore} from "@/stores/scenes.ts";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
+import {Api} from "@/services/api.ts";
 
 const sessionStore = useSessionStore();
 const sceneStore = useScenesStore();
 
 const createSceneDialog = ref(null);
 
+const newSceneName = ref('')
+const newSceneDescription = ref('')
+
 onMounted(() => {
   reloadScenes();
 });
+
+const isCreationFormValid = computed(() => {
+  return newSceneName.value.length > 0 && newSceneDescription.value.length > 0
+})
 
 function signOut() {
   sessionStore.forgetToken();
@@ -32,19 +40,52 @@ function reloadScenes() {
   sceneStore.reloadScenes();
 }
 
+function showCreationDialog() {
+  if (!createSceneDialog.value)
+    return;
+  (createSceneDialog.value!! as HTMLDialogElement).showModal();
+}
+
+function hideCreationDialog() {
+  if (!createSceneDialog.value)
+    return;
+  (createSceneDialog.value!! as HTMLDialogElement).close();
+}
+
+function createScene() {
+  hideCreationDialog();
+  Api.scene.createScene({
+    sceneCreationDto: {
+      name: newSceneName.value,
+      description: newSceneDescription.value
+    }
+  }).subscribe({
+    next: () => {
+      reloadScenes();
+    },
+    error: (err) => {
+      // TODO Show error feedback
+    }
+  })
+}
+
 </script>
 
 <template>
   <!-- New Scene Dialog -->
   <dialog id="new_scene" class="modal" ref="createSceneDialog">
     <div class="modal-box">
-      <h3 class="text-lg font-bold">Hello!</h3>
-      <p class="py-4">Press ESC key or click the button below to close</p>
-      <div class="modal-action">
-        <form method="dialog">
-          <button class="btn">Close</button>
-        </form>
-      </div>
+      <form method="dialog" @submit.prevent="createScene">
+        <h2 class="text-lg font-bold">Create Scene</h2>
+        <div class="flex flex-col gap-5 mt-5">
+          <input type="text" class="input input-bordered" placeholder="Scene Name" v-model="newSceneName">
+          <input type="text" class="input input-bordered" placeholder="Description" v-model="newSceneDescription">
+        </div>
+        <div class="modal-action">
+          <button class="btn btn-ghost" type="button" @click="hideCreationDialog">Cancel</button>
+          <button class="btn" type="submit" :disabled="!isCreationFormValid">Create</button>
+        </div>
+      </form>
     </div>
   </dialog>
 
@@ -56,7 +97,9 @@ function reloadScenes() {
       <ArrowRightStartOnRectangleIcon @click="signOut" class="size-5 mr-5 text-white"></ArrowRightStartOnRectangleIcon>
     </div>
   </div>
+
   <LoadingIndicator v-if="sceneStore.loading"></LoadingIndicator>
+
   <div class="prose mx-10 mb-10" v-if="!sceneStore.loading">
     <h1>Scenes</h1>
   </div>
@@ -73,7 +116,8 @@ function reloadScenes() {
 
     <!-- The scene creation card -->
     <div
-        class="card min-w-72 h-48 select-none bg-neutral-900 hover:bg-neutral-700 border-slate-400 border-solid border new-scene-card">
+        class="card min-w-72 h-48 select-none bg-neutral-900 hover:bg-neutral-700 border-slate-400 border-solid border new-scene-card"
+        @click="showCreationDialog">
       <div class="card-body flex items-center justify-center">
         <PlusIcon class="size-10"></PlusIcon>
         <span>New Scene</span>
