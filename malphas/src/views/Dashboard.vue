@@ -200,7 +200,7 @@ function openInEditor(scene: SceneDto) {
 
   <div class="navbar bg-primary shadow-xl mb-10" id="nav">
     <div class="navbar-start">
-      <span class="px-3 text-slate-200 roboto-regular text-xl select-none">Dashboard</span>
+      <span class="px-3 text-slate-200 roboto-light text-xl select-none">Dashboard</span>
     </div>
     <div class="navbar-end">
       <ArrowRightStartOnRectangleIcon @click="signOut" class="size-5 mr-5 text-white"></ArrowRightStartOnRectangleIcon>
