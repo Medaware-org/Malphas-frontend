@@ -17,6 +17,7 @@ import { BaseAPI, throwIfNullOrUndefined } from '../runtime';
 import type { OperationOpts, HttpHeaders } from '../runtime';
 import type {
     CircuitCreationDto,
+    CircuitDto,
 } from '../models';
 
 export interface PostCircuitRequest {
@@ -27,6 +28,19 @@ export interface PostCircuitRequest {
  * no description
  */
 export class CircuitApi extends BaseAPI {
+
+    /**
+     * Get all circuits
+     * Get All Circuits
+     */
+    listAllCircuits(): Observable<Array<CircuitDto>>
+    listAllCircuits(opts?: OperationOpts): Observable<AjaxResponse<Array<CircuitDto>>>
+    listAllCircuits(opts?: OperationOpts): Observable<Array<CircuitDto> | AjaxResponse<Array<CircuitDto>>> {
+        return this.request<Array<CircuitDto>>({
+            url: '/circuit',
+            method: 'GET',
+        }, opts?.responseOpts);
+    };
 
     /**
      * Create a new circuit

@@ -17,6 +17,7 @@ import { BaseAPI, throwIfNullOrUndefined } from '../runtime';
 import type { OperationOpts, HttpHeaders } from '../runtime';
 import type {
     WireCreationDto,
+    WireDto,
 } from '../models';
 
 export interface PostWireRequest {
@@ -27,6 +28,19 @@ export interface PostWireRequest {
  * no description
  */
 export class WireApi extends BaseAPI {
+
+    /**
+     * Get all wires
+     * Get all wires
+     */
+    listAllWires(): Observable<Array<WireDto>>
+    listAllWires(opts?: OperationOpts): Observable<AjaxResponse<Array<WireDto>>>
+    listAllWires(opts?: OperationOpts): Observable<Array<WireDto> | AjaxResponse<Array<WireDto>>> {
+        return this.request<Array<WireDto>>({
+            url: '/wire',
+            method: 'GET',
+        }, opts?.responseOpts);
+    };
 
     /**
      * Create a new wire

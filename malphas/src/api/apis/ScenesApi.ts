@@ -18,6 +18,7 @@ import type { OperationOpts, HttpHeaders, HttpQuery } from '../runtime';
 import type {
     SceneCreationDto,
     SceneDto,
+    SceneUpdateDto,
 } from '../models';
 
 export interface CreateSceneRequest {
@@ -26,6 +27,10 @@ export interface CreateSceneRequest {
 
 export interface DeleteSceneRequest {
     id?: string;
+}
+
+export interface UpdateSceneRequest {
+    sceneUpdateDto: SceneUpdateDto;
 }
 
 /**
@@ -83,6 +88,27 @@ export class ScenesApi extends BaseAPI {
         return this.request<Array<SceneDto>>({
             url: '/scene',
             method: 'GET',
+        }, opts?.responseOpts);
+    };
+
+    /**
+     * Update an existing scene
+     * Update an existing scene
+     */
+    updateScene({ sceneUpdateDto }: UpdateSceneRequest): Observable<void>
+    updateScene({ sceneUpdateDto }: UpdateSceneRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>>
+    updateScene({ sceneUpdateDto }: UpdateSceneRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>> {
+        throwIfNullOrUndefined(sceneUpdateDto, 'sceneUpdateDto', 'updateScene');
+
+        const headers: HttpHeaders = {
+            'Content-Type': 'application/json',
+        };
+
+        return this.request<void>({
+            url: '/scene',
+            method: 'PUT',
+            headers,
+            body: sceneUpdateDto,
         }, opts?.responseOpts);
     };
 

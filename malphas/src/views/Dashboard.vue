@@ -5,7 +5,8 @@ import {
   ArrowPathIcon,
   ArrowRightStartOnRectangleIcon,
   PencilIcon,
-  TrashIcon
+  TrashIcon,
+  Cog8ToothIcon
 } from '@heroicons/vue/24/outline';
 import {computed, ref} from 'vue';
 import {useSessionStore} from "@/stores/session.ts";
@@ -23,35 +24,46 @@ onMounted(() => {
 const sessionStore = useSessionStore();
 const sceneStore = useScenesStore();
 
-const createSceneDialog = ref<HTMLDialogElement>();
-const newSceneName = ref('')
-const newSceneDescription = ref('')
+const createSceneDialog = ref<HTMLDialogElement>()
+const updateSceneDialog = ref<HTMLDialogElement>()
+const newSceneName = ref('')                // } We're using the same model fields for both the create
+const newSceneDescription = ref('')         // } and edit dialogues
 
-const deleteSceneDialog = ref<HTMLDialogElement>();
-const sceneToDelete = ref<SceneDto | undefined>(undefined)
-
-const isCreationFormValid = computed(() => {
-  return newSceneName.value.length > 0 && newSceneDescription.value.length > 0
-})
+const deleteSceneDialog = ref<HTMLDialogElement>()
+const targetScene = ref<SceneDto | undefined>(undefined) // Both for deleting and updating
 
 function signOut() {
   sessionStore.forgetToken();
   router.push("/auth");
 }
 
+const isCreateOrUpdateFormValid = computed(() => {
+  return newSceneName.value.length > 0 && newSceneDescription.value.length > 0
+})
+
 function reloadScenes() {
   sceneStore.reloadScenes();
 }
 
+function clearFormModel() {
+  newSceneName.value = ""
+  newSceneDescription.value = ""
+}
+
 function showCreationDialog() {
-  newSceneName.value = "";
-  newSceneDescription.value = "";
-  createSceneDialog.value!!.showModal();
+  clearFormModel()
+  createSceneDialog.value!!.showModal()
 }
 
 function showDeleteDialog(scene: SceneDto) {
-  sceneToDelete.value = scene;
-  deleteSceneDialog.value!!.showModal();
+  targetScene.value = scene
+  deleteSceneDialog.value!!.showModal()
+}
+
+function showUpdateDialog(scene: SceneDto) {
+  clearFormModel()
+  targetScene.value = scene
+  updateSceneDialog.value!!.showModal()
 }
 
 function deleteScene(shouldDelete: boolean) {
@@ -61,7 +73,7 @@ function deleteScene(shouldDelete: boolean) {
     return;
 
   Api.scene.deleteScene({
-    id: sceneToDelete.value!!.id
+    id: targetScene.value!!.id
   }).subscribe({
     next: () => {
       reloadScenes();
@@ -93,6 +105,28 @@ function createScene(shouldCreate: boolean) {
   })
 }
 
+function updateScene(shouldUpdate: boolean) {
+  updateSceneDialog.value!!.close();
+
+  if (!shouldUpdate)
+    return;
+
+  Api.scene.updateScene({
+    sceneUpdateDto: {
+      id: targetScene.value!!.id,
+      name: newSceneName.value,
+      description: newSceneDescription.value
+    }
+  }).subscribe({
+    next: () => {
+      reloadScenes();
+    },
+    error: (err) => {
+      // TODO Show error
+    }
+  })
+}
+
 </script>
 
 <template>
@@ -107,7 +141,24 @@ function createScene(shouldCreate: boolean) {
         </div>
         <div class="modal-action">
           <button class="btn btn-ghost" type="button" @click="createScene(false)">Cancel</button>
-          <button class="btn" type="submit" :disabled="!isCreationFormValid">Create</button>
+          <button class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">Create</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Scene Edit Dialog -->
+  <dialog id="new_scene" class="modal" ref="updateSceneDialog">
+    <div class="modal-box">
+      <form method="dialog" @submit.prevent="updateScene(true)">
+        <h2 class="text-lg font-bold">Edit Scene Details</h2>
+        <div class="flex flex-col gap-5 mt-5">
+          <input type="text" class="input input-bordered" placeholder="New Name" v-model="newSceneName">
+          <input type="text" class="input input-bordered" placeholder="New Description" v-model="newSceneDescription">
+        </div>
+        <div class="modal-action">
+          <button class="btn btn-ghost" type="button" @click="updateScene(false)">Cancel</button>
+          <button class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">Update</button>
         </div>
       </form>
     </div>
@@ -117,7 +168,7 @@ function createScene(shouldCreate: boolean) {
   <dialog id="new_scene" class="modal" ref="deleteSceneDialog">
     <div class="modal-box">
       <h2 class="text-lg font-bold">Delete Scene?</h2>
-      <span>Are you sure that you want to delete the scene <span class="italic">{{ sceneToDelete?.name }}</span> and all of its internal circuitry?</span>
+      <span>Are you sure that you want to delete the scene <span class="italic">{{ targetScene?.name }}</span> and all of its internal circuitry?</span>
       <div class="modal-action">
         <button class="btn btn-ghost" type="button" @click="deleteScene(false)">Cancel</button>
         <button class="btn" type="button" @click="deleteScene(true)">Delete</button>
@@ -175,8 +226,13 @@ function createScene(shouldCreate: boolean) {
               <TrashIcon class="size-5 inline"></TrashIcon>
             </button>
           </div>
-          <div class="tooltip flex-1 tooltip-bottom" data-tip="Open in Editor">
+          <div class="tooltip flex-1 tooltip-bottom" data-tip="Edit Details" @click="showUpdateDialog(scene)">
             <button class="btn btn-accent w-full btn-outline text-accent">
+              <Cog8ToothIcon class="size-5 inline"></Cog8ToothIcon>
+            </button>
+          </div>
+          <div class="tooltip flex-1 tooltip-bottom" data-tip="Open in Editor">
+            <button class="btn btn-warning w-full btn-outline text-accent">
               <PencilIcon class="size-5 inline"></PencilIcon>
             </button>
           </div>

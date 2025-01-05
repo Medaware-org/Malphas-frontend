@@ -7,11 +7,14 @@ apis/WireApi.ts
 apis/index.ts
 index.ts
 models/CircuitCreationDto.ts
+models/CircuitDto.ts
 models/CredentialsDto.ts
 models/SceneCreationDto.ts
 models/SceneDto.ts
+models/SceneUpdateDto.ts
 models/TokenDto.ts
 models/WireCreationDto.ts
+models/WireDto.ts
 models/index.ts
 runtime.ts
 servers.ts

@@ -106,6 +106,21 @@ paths:
       responses:
         200:
           description: OK
+    put:
+      tags:
+        - Scenes
+      operationId: updateScene
+      summary: Update an existing scene
+      description: Update an existing scene
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sceneUpdateDto"
+      responses:
+        200:
+          description: OK
 
   /circuit:
     post:
@@ -213,6 +228,20 @@ components:
         description:
           type: string
       required:
+        - name
+        - description
+    sceneUpdateDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+      required:
+        - id
         - name
         - description
     tokenDto:
