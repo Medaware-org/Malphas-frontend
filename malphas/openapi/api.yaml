@@ -305,7 +305,7 @@ components:
           type: string
           format: uuid
         init_signal:
-          type: bool
+          type: boolean
         number_input:
           type: int
         number_output:
@@ -329,7 +329,7 @@ components:
           type: string
           format: uuid
         init_signal:
-          type: bool
+          type: boolean
         amount_input:
           type: int
         amount_output:

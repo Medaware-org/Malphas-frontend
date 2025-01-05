@@ -11,10 +11,6 @@
  * Do not edit the class manually.
  */
 
-import type {
-    Bool,
-} from './';
-
 /**
  * @export
  * @interface WireCreationDto
@@ -31,10 +27,10 @@ export interface WireCreationDto {
      */
     target_circuit: string;
     /**
-     * @type {Bool}
+     * @type {boolean}
      * @memberof WireCreationDto
      */
-    init_signal: Bool;
+    init_signal: boolean;
     /**
      * @type {number}
      * @memberof WireCreationDto
