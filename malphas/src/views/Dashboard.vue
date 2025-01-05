@@ -2,8 +2,15 @@
 
 import {useSessionStore} from "@/stores/session.ts";
 import router from "@/router";
+import {onMounted} from "vue";
+import {useScenesStore} from "@/stores/scenes.ts";
 
 const sessionStore = useSessionStore();
+const sceneStore = useScenesStore();
+
+onMounted(() => {
+  sceneStore.reloadScenes();
+});
 
 function signOut() {
   sessionStore.forgetToken();
@@ -19,6 +26,15 @@ function signOut() {
     </div>
     <div class="navbar-end">
       <i class="fas fa-sign-out text-xl text-white mr-5 cursor-pointer" @click="signOut"></i>
+    </div>
+  </div>
+  <div class="flex flex-row gap-5">
+    <div class="card" v-for="scene in sceneStore.scenes">
+      <div class="card-body">
+        <h2 class="card-title">
+          {{ scene.name }}
+        </h2>
+      </div>
     </div>
   </div>
 </template>

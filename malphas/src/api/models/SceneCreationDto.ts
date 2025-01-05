@@ -13,17 +13,22 @@
 
 /**
  * @export
- * @interface Project
+ * @interface SceneCreationDto
  */
-export interface Project {
+export interface SceneCreationDto {
     /**
      * @type {string}
-     * @memberof Project
+     * @memberof SceneCreationDto
      */
-    id: string;
+    author: string;
     /**
      * @type {string}
-     * @memberof Project
+     * @memberof SceneCreationDto
      */
-    title: string;
+    name: string;
+    /**
+     * @type {string}
+     * @memberof SceneCreationDto
+     */
+    description: string;
 }

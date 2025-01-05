@@ -39,9 +39,9 @@ paths:
         200:
           description: OK
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: "#/components/schemas/tokenDto"
 
   /register:
     post:
@@ -60,13 +60,13 @@ paths:
         200:
           description: OK
 
-  /projects:
+  /scene:
     get:
       tags:
-        - Project
-      operationId: listAllProjects
-      summary: Get All Projects
-      description: Get a list of all the projects of the current user
+        - Scenes
+      operationId: listAllScenes
+      summary: Get All Scenes
+      description: Get a list of all the scenes of the current user
       responses:
         200:
           description: OK
@@ -75,7 +75,22 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/project"
+                  $ref: "#/components/schemas/sceneDto"
+    post:
+      tags:
+        - Scenes
+      operationId: createScene
+      summary: Create a new scene
+      description: Create a new scene
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sceneCreationDto"
+      responses:
+        200:
+          description: OK
 
 components:
   schemas:
@@ -89,14 +104,42 @@ components:
       required:
         - username
         - password
-    project:
+    sceneDto:
       type: object
       properties:
         id:
           type: string
           format: uuid
-        title:
+        author:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
           type: string
       required:
         - id
-        - title
+        - author
+        - name
+        - description
+    sceneCreationDto:
+      type: object
+      properties:
+        author:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+      required:
+        - author
+        - name
+        - description
+    tokenDto:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+        - token

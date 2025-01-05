@@ -1,11 +1,13 @@
 .gitignore
 apis/AuthenticationApi.ts
-apis/ProjectApi.ts
+apis/ScenesApi.ts
 apis/StatusApi.ts
 apis/index.ts
 index.ts
 models/CredentialsDto.ts
-models/Project.ts
+models/SceneCreationDto.ts
+models/SceneDto.ts
+models/TokenDto.ts
 models/index.ts
 runtime.ts
 servers.ts

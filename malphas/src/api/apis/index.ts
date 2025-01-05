@@ -1,3 +1,3 @@
 export * from './AuthenticationApi';
-export * from './ProjectApi';
+export * from './ScenesApi';
 export * from './StatusApi';

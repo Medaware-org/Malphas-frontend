@@ -17,6 +17,7 @@ import { BaseAPI, throwIfNullOrUndefined } from '../runtime';
 import type { OperationOpts, HttpHeaders } from '../runtime';
 import type {
     CredentialsDto,
+    TokenDto,
 } from '../models';
 
 export interface LoginRequest {
@@ -36,16 +37,16 @@ export class AuthenticationApi extends BaseAPI {
      * Attempt to log in with the given credentials
      * Login
      */
-    login({ credentialsDto }: LoginRequest): Observable<string>
-    login({ credentialsDto }: LoginRequest, opts?: OperationOpts): Observable<AjaxResponse<string>>
-    login({ credentialsDto }: LoginRequest, opts?: OperationOpts): Observable<string | AjaxResponse<string>> {
+    login({ credentialsDto }: LoginRequest): Observable<TokenDto>
+    login({ credentialsDto }: LoginRequest, opts?: OperationOpts): Observable<AjaxResponse<TokenDto>>
+    login({ credentialsDto }: LoginRequest, opts?: OperationOpts): Observable<TokenDto | AjaxResponse<TokenDto>> {
         throwIfNullOrUndefined(credentialsDto, 'credentialsDto', 'login');
 
         const headers: HttpHeaders = {
             'Content-Type': 'application/json',
         };
 
-        return this.request<string>({
+        return this.request<TokenDto>({
             url: '/login',
             method: 'POST',
             headers,

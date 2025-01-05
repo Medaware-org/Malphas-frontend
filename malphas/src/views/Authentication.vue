@@ -4,6 +4,7 @@ import {ref, computed, onMounted} from 'vue';
 import {useSessionStore} from "@/stores/session.ts";
 import router from "@/router";
 import {Api} from "@/services/api.ts";
+import type {TokenDto} from "@/api";
 
 const sessionStore = useSessionStore()
 
@@ -33,9 +34,9 @@ function login() {
       password: password.value,
     }
   }).subscribe({
-    next: (token: string) => {
-      sessionStore.setToken(token);
-      router.push("/dash");
+    next: (token: TokenDto) => {
+      sessionStore.setToken(token.token)
+      router.push("/dash")
     },
     error(err: any) {
       errorMessage.value = err?.response?.description || "An unknown error occurred"

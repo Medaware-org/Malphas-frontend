@@ -13,17 +13,12 @@
 
 /**
  * @export
- * @interface SignInRequest
+ * @interface TokenDto
  */
-export interface SignInRequest {
+export interface TokenDto {
     /**
      * @type {string}
-     * @memberof SignInRequest
+     * @memberof TokenDto
      */
-    username: string;
-    /**
-     * @type {string}
-     * @memberof SignInRequest
-     */
-    password: string;
+    token: string;
 }

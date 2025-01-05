@@ -1,14 +1,10 @@
-import {Configuration, AuthenticationApi, StatusApi, ProjectApi, type Middleware} from '@/api';
+import {Configuration, AuthenticationApi, StatusApi, ScenesApi, type Middleware} from '@/api';
 import type {AjaxConfig, AjaxResponse} from 'rxjs/ajax';
-import {retrieveToken} from "@/services/tokenService.ts";
-
-const apiConfig = new Configuration({
-        basePath: window.location.origin.replace("5173", "1234")
-});
+import {useSessionStore} from "@/stores/session.ts";
 
 class AuthorizationMiddleware implements Middleware {
         pre(request: AjaxConfig): AjaxConfig {
-                const token = retrieveToken()
+                const token = useSessionStore().getToken();
                 if (!token)
                         return request;
                 request.headers = {
@@ -19,17 +15,21 @@ class AuthorizationMiddleware implements Middleware {
         }
 
         post(response: AjaxResponse<any>): AjaxResponse<any> {
-                return response
+                return response;
         }
 }
 
-const middleware = new AuthorizationMiddleware()
-const statusApi = new StatusApi(apiConfig).withMiddleware([middleware])
-const authenticationApi = new AuthenticationApi(apiConfig).withMiddleware([middleware])
-const projectsApi = new ProjectApi(apiConfig).withMiddleware([middleware])
+const apiConfig = new Configuration({
+        basePath: window.location.origin.replace("5173", "1234"),
+        middleware: [new AuthorizationMiddleware()]
+});
+
+const statusApi = new StatusApi(apiConfig)
+const authenticationApi = new AuthenticationApi(apiConfig)
+const sceneApi = new ScenesApi(apiConfig)
 
 export const Api = {
         status: statusApi,
         auth: authenticationApi,
-        project: projectsApi
+        scene: sceneApi
 }
