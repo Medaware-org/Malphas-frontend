@@ -113,6 +113,23 @@ paths:
         500:
           description: InternalError
 
+  /wire:
+    post:
+      tags:
+        - Wire
+      operationId: postWire
+      summary: Create a new wire
+      description: Create a new wire
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/wireCreationDto"
+      responses:
+        200:
+          description: OK
+
 components:
   schemas:
     credentialsDto:
@@ -184,3 +201,24 @@ components:
         - gateType
         - location_x
         - location_y
+    wireCreationDto:
+      type: object
+      properties:
+        source_circuit:
+          type: string
+          format: uuid
+        target_circuit:
+          type: string
+          format: uuid
+        init_signal:
+          type: bool
+        number_input:
+          type: int
+        number_output:
+          type: int
+      required:
+        - source_circuit
+        - target_circuit
+        - init_signal
+        - number_input
+        - number_output
