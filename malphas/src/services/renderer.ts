@@ -145,6 +145,9 @@ export class CircuitRenderer {
         static readonly MAX_ZOOM_LEVEL = 2.0;
         static readonly MIN_ZOOM_LEVEL = 0.02;
 
+        // The upper zoom value from that onwards we don't render grid lines anymore (Performance reasons)
+        static readonly GRID_RENDER_THRESHOLD = 0.1;
+
         private canvas: HTMLCanvasElement;
         private readonly context: CanvasRenderingContext2D;
 
@@ -269,15 +272,17 @@ export class CircuitRenderer {
 
                 this.gridUnit = unitSize;
 
-                // Clamp the offset to the grid
-                let xOffset = this.viewportPosition[0] % unitSize
-                let yOffset = this.viewportPosition[1] % unitSize
+                if (this.viewportScale > CircuitRenderer.GRID_RENDER_THRESHOLD) {
+                        // Clamp the offset to the grid
+                        let xOffset = this.viewportPosition[0] % unitSize
+                        let yOffset = this.viewportPosition[1] % unitSize
 
-                let n: number;
-                for (n = 0; n < hSubdivisions + 2; n++)
-                        this.drawLine(n * unitSize + xOffset, yOffset - unitSize, xOffset + n * unitSize, this.height)
-                for (n = 0; n < adjVSubdivisions + 1; n++)
-                        this.drawLine(xOffset - unitSize, yOffset + n * unitSize, xOffset + this.width + unitSize, yOffset + n * unitSize);
+                        let n: number;
+                        for (n = 0; n < hSubdivisions + 2; n++)
+                                this.drawLine(n * unitSize + xOffset, yOffset - unitSize, xOffset + n * unitSize, this.height)
+                        for (n = 0; n < adjVSubdivisions + 1; n++)
+                                this.drawLine(xOffset - unitSize, yOffset + n * unitSize, xOffset + this.width + unitSize, yOffset + n * unitSize);
+                }
 
                 this.testCircuit.draw(this.context)
 

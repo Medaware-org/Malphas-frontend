@@ -12,12 +12,16 @@ const sessionStore = useSessionStore();
 const sceneStore = useScenesStore();
 
 onMounted(() => {
-  sceneStore.reloadScenes();
+  reloadScenes();
 });
 
 function signOut() {
   sessionStore.forgetToken();
   router.push("/auth");
+}
+
+function reloadScenes() {
+  sceneStore.reloadScenes();
 }
 
 </script>
@@ -32,16 +36,31 @@ function signOut() {
     </div>
   </div>
   <LoadingIndicator v-if="sceneStore.loading"></LoadingIndicator>
-  <div class="flex flex-row gap-5 mx-10" v-if="!sceneStore.loading">
+  <div class="prose mx-10 mb-10" v-if="!sceneStore.loading">
+    <h1>Scenes</h1>
+  </div>
+  <div class="flex flex-row gap-10 mx-10 flex-wrap" v-if="!sceneStore.loading">
+    <!-- Reload card -->
+    <div
+        class="card min-w-72 h-48 select-none bg-neutral-900 hover:bg-neutral-700 border-slate-400 border-solid border new-scene-card"
+        @click="reloadScenes">
+      <div class="card-body flex items-center justify-center">
+        <ArrowPathIcon class="size-10"></ArrowPathIcon>
+        <span>Reload</span>
+      </div>
+    </div>
+
     <!-- The scene creation card -->
-    <div class="card w-72 bg-neutral-900 hover:bg-neutral-700 border-slate-400 border-solid border new-scene-card">
+    <div
+        class="card min-w-72 h-48 select-none bg-neutral-900 hover:bg-neutral-700 border-slate-400 border-solid border new-scene-card">
       <div class="card-body flex items-center justify-center">
         <PlusIcon class="size-10"></PlusIcon>
+        <span>New Scene</span>
       </div>
     </div>
 
     <!-- Scene cards -->
-    <div class="card w-72 bg-neutral-900 border-slate-400 border-solid border"
+    <div class="card min-w-72 h-48 bg-neutral-900 border-slate-400 border-solid border"
          v-for="scene in sceneStore.scenes">
       <div class="card-body">
         <h2 class="card-title">
@@ -51,13 +70,6 @@ function signOut() {
         <div class="card-actions justify-end mt-2">
           <button class="btn btn-primary">Edit</button>
         </div>
-      </div>
-    </div>
-
-    <!-- Reload card -->
-    <div class="card w-72 bg-neutral-900 hover:bg-neutral-700 border-slate-400 border-solid border new-scene-card">
-      <div class="card-body flex items-center justify-center">
-        <ArrowPathIcon class="size-10"></ArrowPathIcon>
       </div>
     </div>
   </div>

@@ -27,7 +27,7 @@ defineExpose({
 </script>
 
 <template>
-  <canvas ref="canvas" id="canvas"></canvas>
+  <canvas class="select-none" ref="canvas" id="canvas"></canvas>
 </template>
 
 <style scoped>

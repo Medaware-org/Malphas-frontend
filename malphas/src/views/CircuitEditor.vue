@@ -4,6 +4,8 @@ import Viewport from "@/components/Viewport.vue";
 
 import {ref} from 'vue';
 
+import {ArrowsPointingInIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon} from "@heroicons/vue/24/outline";
+
 const viewportRef = ref<InstanceType<typeof Viewport> | null>(null);
 
 const recenterViewport = () => {
@@ -29,17 +31,17 @@ const zoomOutViewport = () => {
     <div class="m-8 pointer-events-auto xl:flex-col flex-row" id="button-container">
       <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Center View">
         <button class="btn btn-primary btn-circle" @click="recenterViewport">
-          <i class="fas fa-arrows text-2xl"></i>
+          <ArrowsPointingInIcon class="size-7 inline"></ArrowsPointingInIcon>
         </button>
       </div>
       <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Zoom In">
         <button class="btn btn-primary btn-circle" @click="zoomInViewport">
-          <i class="fas fa-plus text-2xl"></i>
+          <MagnifyingGlassPlusIcon class="size-7 inline"></MagnifyingGlassPlusIcon>
         </button>
       </div>
       <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Zoom Out">
         <button class="btn btn-primary btn-circle" @click="zoomOutViewport">
-          <i class="fas fa-minus text-2xl"></i>
+          <MagnifyingGlassMinusIcon class="size-7 inline"></MagnifyingGlassMinusIcon>
         </button>
       </div>
     </div>
