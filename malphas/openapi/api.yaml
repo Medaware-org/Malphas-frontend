@@ -144,6 +144,21 @@ paths:
       responses:
         200:
           description: OK
+    get:
+      tags:
+        - Wire
+      operationId: listAllWires
+      summary: Get all wires
+      description: Get all wires
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/wireDto"
 
 components:
   schemas:
@@ -261,3 +276,32 @@ components:
         - init_signal
         - number_input
         - number_output
+    wireDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        source_circuit:
+          type: string
+          format: uuid
+        target_circuit:
+          type: string
+          format: uuid
+        init_signal:
+          type: bool
+        amount_input:
+          type: int
+        amount_output:
+          type: int
+        location:
+          type: string
+      required:
+        - id
+        - source_circuit
+        - target_circuit
+        - location_y
+        - init_signal
+        - amount_input
+        - amount_output
+        - location
