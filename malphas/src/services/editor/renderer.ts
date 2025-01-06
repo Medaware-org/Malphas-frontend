@@ -1,6 +1,7 @@
 import {type CircuitNode, traverseAllAsts, traverseAst} from "@/services/editor/ast.ts";
 import {useComponentsStore} from "@/stores/components.ts";
 import {Api} from "@/services/api.ts";
+import {useScenesStore} from "@/stores/scenes.ts";
 
 function commitDrag(node: CircuitNode) {
         Api.circuit.updateCircuit({
@@ -9,10 +10,15 @@ function commitDrag(node: CircuitNode) {
                         location_x: node.location[0],
                         location_y: node.location[1]
                 }
+        }).subscribe({
+                next: () => {
+                },
+                error: (err: any) => {
+                }
         })
 }
 
-function createWire(src: CircuitNode, srcIndex: number, dst: CircuitNode, dstIndex: number, path: [number, number][]) {
+function createWire(src: CircuitNode, srcIndex: number, dst: CircuitNode, dstIndex: number, path: [number, number][], okCallback: () => void) {
         Api.wire.postWire({
                 wireCreationDto: {
                         source_circuit: src.dto.id,
@@ -21,6 +27,12 @@ function createWire(src: CircuitNode, srcIndex: number, dst: CircuitNode, dstInd
                         number_input: srcIndex,
                         number_output: dstIndex,
                         location: JSON.stringify(path)
+                }
+        }).subscribe({
+                next: () => {
+                        okCallback();
+                },
+                error: (err: any) => {
                 }
         })
 }
@@ -59,7 +71,7 @@ export class CircuitRenderer {
 
         private mousePresent: boolean = true
 
-        private readonly ast: CircuitNode[]
+        private ast: CircuitNode[]
 
         //
         // Stuff to keep track of and manage the editing process
@@ -89,6 +101,17 @@ export class CircuitRenderer {
 
                 this.setupListeners();
                 this.render();
+        }
+
+        private rebuildAst() {
+                const components = useComponentsStore()
+                components.loadWiresAndCircuits(useScenesStore().selectedScene!!, () => {
+                }, () => {
+                        components.buildAst(() => {
+                        }, () => {
+                                this.ast = components.ast as unknown as CircuitNode[];
+                        });
+                })
         }
 
         public centerView(reRender: boolean = true) {
@@ -347,8 +370,21 @@ export class CircuitRenderer {
 
                 // A wire must end on the opposite type of connection
                 if (this.isTmpWireValid) {
-                        // TODO Commit changes
+                        this.wirePath.push(this.snappedMousePosition);
+
+                        let params: [CircuitNode, number, CircuitNode, number, [number, number][]]
+                                = [this.wireStart!![0], this.wireStart!![1], this.locationType[0]!!, this.locationType[1], this.wirePath]
+
+                        // The wire was drawn output to input; we need to re-orient the parameters
+                        if (this.wireStart!![2] == 'input') {
+                                params = [this.locationType[0]!!, this.locationType[1], this.wireStart!![0], this.wireStart!![1], this.wirePath.reverse()]
+                        }
+
                         this.wirePath = []
+
+                        createWire(...params, () => {
+                                this.rebuildAst();
+                        })
                 }
         }
 

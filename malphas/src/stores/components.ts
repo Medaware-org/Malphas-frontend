@@ -54,7 +54,7 @@ export const useComponentsStore = defineStore("components", {
                         })
                 },
 
-                buildAst(onError: (error: ErrorDto) => void): void {
+                buildAst(onError: (error: ErrorDto) => void = () => {}, then: () => void = () => {}): void {
                         this.ast = []
 
                         if (this.circuits.length == 0 || this.wires.length == 0) {
