@@ -363,19 +363,14 @@ components:
     circuitUpdateDto:
       type: object
       properties:
-        source_circuit:
+        location_x:
+          type: integer
+        location_y:
+          type: integer
+        parent_circuit:
           type: string
           format: uuid
-        target_circuit:
-          type: string
-          format: uuid
-        init_signal:
-          type: boolean
-        number_input:
-          type: integer
-        number_output:
-          type: integer
-        location:
+        gate_type:
           type: string
     wireCreationDto:
       type: object

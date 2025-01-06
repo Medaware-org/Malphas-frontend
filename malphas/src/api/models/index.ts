@@ -1,5 +1,6 @@
 export * from './CircuitCreationDto';
 export * from './CircuitDto';
+export * from './CircuitUpdateDto';
 export * from './CredentialsDto';
 export * from './ErrorDto';
 export * from './SceneCreationDto';

@@ -1,24 +1,29 @@
-import {circuitElements, NotCircuit} from "@/services/editor/circuits.ts";
-import type {CircuitElement} from "@/services/editor/element.ts";
 import {type CircuitNode, traverseAllAsts, traverseAst} from "@/services/editor/ast.ts";
 import {useComponentsStore} from "@/stores/components.ts";
 import {Api} from "@/services/api.ts";
 
 function commitDrag(node: CircuitNode, location: [number, number]) {
-}
-
-function createWire(src: CircuitNode, srcIndex: number, dst: CircuitNode, dstIndex: number, path: [number, number][]) {
-        Api.wire.postWire({
-                wireCreationDto: {
-                        source_circuit: src.dto.id,
-                        target_circuit: dst.dto.id,
-                        init_signal: false,
-                        number_input: srcIndex,
-                        number_output: dstIndex,
-                        location: JSON.stringify(path)
+        Api.circuit.updateCircuit({
+                id: node.dto.id,
+                circuitUpdateDto: {
+                        location_x: location[0],
+                        location_y: location[1]
                 }
         })
 }
+
+// function createWire(src: CircuitNode, srcIndex: number, dst: CircuitNode, dstIndex: number, path: [number, number][]) {
+//         Api.wire.postWire({
+//                 wireCreationDto: {
+//                         source_circuit: src.dto.id,
+//                         target_circuit: dst.dto.id,
+//                         init_signal: false,
+//                         number_input: srcIndex,
+//                         number_output: dstIndex,
+//                         location: JSON.stringify(path)
+//                 }
+//         })
+// }
 
 export class CircuitRenderer {
         static readonly BACKGROUND_COLOR = '#0A0A0A';

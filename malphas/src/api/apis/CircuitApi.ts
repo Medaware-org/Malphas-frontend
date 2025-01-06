@@ -18,6 +18,7 @@ import type { OperationOpts, HttpHeaders, HttpQuery } from '../runtime';
 import type {
     CircuitCreationDto,
     CircuitDto,
+    CircuitUpdateDto,
 } from '../models';
 
 export interface DeleteCircuitRequest {
@@ -30,6 +31,11 @@ export interface ListAllCircuitsRequest {
 
 export interface PostCircuitRequest {
     circuitCreationDto: CircuitCreationDto;
+}
+
+export interface UpdateCircuitRequest {
+    id: string;
+    circuitUpdateDto?: CircuitUpdateDto;
 }
 
 /**
@@ -94,6 +100,32 @@ export class CircuitApi extends BaseAPI {
             method: 'POST',
             headers,
             body: circuitCreationDto,
+        }, opts?.responseOpts);
+    };
+
+    /**
+     * Update parameters of an existing circuit
+     * Update a circuit
+     */
+    updateCircuit({ id, circuitUpdateDto }: UpdateCircuitRequest): Observable<void>
+    updateCircuit({ id, circuitUpdateDto }: UpdateCircuitRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>>
+    updateCircuit({ id, circuitUpdateDto }: UpdateCircuitRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>> {
+        throwIfNullOrUndefined(id, 'id', 'updateCircuit');
+
+        const headers: HttpHeaders = {
+            'Content-Type': 'application/json',
+        };
+
+        const query: HttpQuery = { // required parameters are used directly since they are already checked by throwIfNullOrUndefined
+            'id': id,
+        };
+
+        return this.request<void>({
+            url: '/circuit',
+            method: 'PUT',
+            headers,
+            query,
+            body: circuitUpdateDto,
         }, opts?.responseOpts);
     };
 
