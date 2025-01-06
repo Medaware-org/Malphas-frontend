@@ -139,9 +139,9 @@ paths:
         200:
           description: OK
         400:
-          description: InvalidCredentials
+          description: Invalid credentials
         500:
-          description: InternalError
+          description: Internal server error
     get:
       tags:
         - Circuit
@@ -179,7 +179,14 @@ paths:
         - Wire
       operationId: listAllWires
       summary: Get all wires
-      description: Get all wires
+      description: Get all wires in a given scene
+      parameters:
+        - in: query
+          name: scene
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         200:
           description: OK
