@@ -2,28 +2,28 @@ import {type CircuitNode, traverseAllAsts, traverseAst} from "@/services/editor/
 import {useComponentsStore} from "@/stores/components.ts";
 import {Api} from "@/services/api.ts";
 
-function commitDrag(node: CircuitNode, location: [number, number]) {
+function commitDrag(node: CircuitNode) {
         Api.circuit.updateCircuit({
                 id: node.dto.id,
                 circuitUpdateDto: {
-                        location_x: location[0],
-                        location_y: location[1]
+                        location_x: node.location[0],
+                        location_y: node.location[1]
                 }
         })
 }
 
-// function createWire(src: CircuitNode, srcIndex: number, dst: CircuitNode, dstIndex: number, path: [number, number][]) {
-//         Api.wire.postWire({
-//                 wireCreationDto: {
-//                         source_circuit: src.dto.id,
-//                         target_circuit: dst.dto.id,
-//                         init_signal: false,
-//                         number_input: srcIndex,
-//                         number_output: dstIndex,
-//                         location: JSON.stringify(path)
-//                 }
-//         })
-// }
+function createWire(src: CircuitNode, srcIndex: number, dst: CircuitNode, dstIndex: number, path: [number, number][]) {
+        Api.wire.postWire({
+                wireCreationDto: {
+                        source_circuit: src.dto.id,
+                        target_circuit: dst.dto.id,
+                        init_signal: false,
+                        number_input: srcIndex,
+                        number_output: dstIndex,
+                        location: JSON.stringify(path)
+                }
+        })
+}
 
 export class CircuitRenderer {
         static readonly BACKGROUND_COLOR = '#0A0A0A';
@@ -395,6 +395,7 @@ export class CircuitRenderer {
                         }
 
                         if ((event.button == 0 || event.button == 2) && this.draggingNode) {
+                                commitDrag(this.draggingNode)
                                 this.draggingNode = undefined; // Commit the changes!
                                 return;
                         }
