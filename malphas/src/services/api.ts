@@ -1,4 +1,4 @@
-import {Configuration, AuthenticationApi, StatusApi, ScenesApi, type Middleware} from '@/api';
+import {Configuration, AuthenticationApi, StatusApi, ScenesApi, type Middleware, WireApi, CircuitApi} from '@/api';
 import type {AjaxConfig, AjaxResponse} from 'rxjs/ajax';
 import {useSessionStore} from "@/stores/session.ts";
 
@@ -27,9 +27,13 @@ const apiConfig = new Configuration({
 const statusApi = new StatusApi(apiConfig)
 const authenticationApi = new AuthenticationApi(apiConfig)
 const sceneApi = new ScenesApi(apiConfig)
+const wireApi = new WireApi(apiConfig)
+const circuitApi = new CircuitApi(apiConfig)
 
 export const Api = {
         status: statusApi,
         auth: authenticationApi,
-        scene: sceneApi
+        scene: sceneApi,
+        wire: wireApi,
+        circuit: circuitApi
 }

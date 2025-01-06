@@ -25,7 +25,7 @@ export interface CircuitCreationDto {
      * @type {string}
      * @memberof CircuitCreationDto
      */
-    gateType: string;
+    gate_type: string;
     /**
      * @type {number}
      * @memberof CircuitCreationDto

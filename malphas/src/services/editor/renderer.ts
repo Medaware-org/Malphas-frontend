@@ -1,141 +1,7 @@
-export abstract class CircuitElement {
-        static readonly BACKGROUND_COLOR = '#37cdbe';
-        static readonly CONTOUR_COLOR = '#27a89b';
-        static readonly CONNECTION_COLOR = '#ecf0f1';
-        static readonly CONNECTION_SIZE = 0.15;
-
-        public worldPosition: [number, number];
-        protected renderer: CircuitRenderer;
-
-        constructor(renderer: CircuitRenderer, x: number, y: number) {
-                this.renderer = renderer;
-                this.worldPosition = [x, y];
-        }
-
-        abstract geometry(): number[][];
-
-        abstract connections(): number[][];
-
-        drawGeometry(context: CanvasRenderingContext2D): void {
-                if (!this.isVisible())
-                        return;
-
-                let geometry = this.geometry();
-
-                // Invalid geometry
-                if (geometry.length < 3)
-                        return;
-
-                context.fillStyle = CircuitElement.BACKGROUND_COLOR;
-                context.strokeStyle = CircuitElement.CONTOUR_COLOR;
-                context.lineWidth = 7;
-
-                context.beginPath();
-
-                let first = true;
-                for (let point of [...geometry, geometry[0]]) {
-                        if (point.length != 2)
-                                return;
-                        let absolutePoint = [
-                                point[0] + this.worldPosition[0],
-                                point[1] + this.worldPosition[1]
-                        ];
-                        let projected = this.renderer.projectPoint(absolutePoint as unknown as [number, number]);
-                        if (first) {
-                                context.moveTo(...projected);
-                                first = false;
-                                continue;
-                        }
-                        context.lineTo(...projected);
-                }
-
-                context.closePath();
-                context.fill();
-                context.stroke();
-        }
-
-        private drawConnectionPoint(point: [number, number]): void {
-                let horizLine = [
-                        this.renderer.projectPoint([point[0] - CircuitElement.CONNECTION_SIZE, point[1]]),
-                        this.renderer.projectPoint([point[0] + CircuitElement.CONNECTION_SIZE, point[1]])
-                ];
-                let vertLine = [
-                        this.renderer.projectPoint([point[0], point[1] - CircuitElement.CONNECTION_SIZE]),
-                        this.renderer.projectPoint([point[0], point[1] + CircuitElement.CONNECTION_SIZE])
-                ];
-                this.renderer.drawLine(horizLine[0][0], horizLine[0][1], horizLine[1][0], horizLine[1][1]);
-                this.renderer.drawLine(vertLine[0][0], vertLine[0][1], vertLine[1][0], vertLine[1][1]);
-        }
-
-        drawConnections(context: CanvasRenderingContext2D): void {
-                if (!this.isVisible())
-                        return;
-
-                context.strokeStyle = CircuitElement.CONNECTION_COLOR;
-                context.lineWidth = 5;
-
-                for (let conn of this.connections()) {
-                        if (conn.length != 2)
-                                continue;
-
-                        let absoluteConn = [
-                                conn[0] + this.worldPosition[0],
-                                conn[1] + this.worldPosition[1],
-                        ];
-
-                        this.drawConnectionPoint(absoluteConn as unknown as [number, number])
-                }
-        }
-
-        draw(context: CanvasRenderingContext2D): void {
-                if (!this.isVisible())
-                        return;
-
-                this.drawGeometry(context);
-                this.drawConnections(context);
-        }
-
-        isVisible(): boolean {
-                for (let point of this.geometry()) {
-                        if (point.length != 2)
-                                continue;
-
-                        let absolutePoint = [
-                                point[0] + this.worldPosition[0],
-                                point[1] + this.worldPosition[1]
-                        ];
-
-                        if (this.renderer.isWorldPointVisible(absolutePoint as unknown as [number, number]))
-                                return true;
-                }
-
-                return false;
-        }
-}
-
-export class NotCircuit extends CircuitElement {
-        override geometry(): number[][] {
-                return [
-                        [0, 2],
-                        [4, 0],
-                        [0, -2]
-                ];
-        }
-
-        override connections(): number[][] {
-                return [
-                        [0, 1],
-                        [0, -1],
-                        [4, 0]
-                ];
-        }
-}
-
-enum PointerStatus {
-        NONE,
-        ERROR,
-        OK
-}
+import {circuitElements, NotCircuit} from "@/services/editor/circuits.ts";
+import type {CircuitElement} from "@/services/editor/element.ts";
+import type {CircuitNode} from "@/services/editor/ast.ts";
+import {useComponentsStore} from "@/stores/components.ts";
 
 export class CircuitRenderer {
         static readonly BACKGROUND_COLOR = '#0A0A0A';
@@ -167,13 +33,13 @@ export class CircuitRenderer {
 
         private mousePresent: boolean = true
 
-        private pointerStatus: PointerStatus = PointerStatus.NONE;
-
-        private testCircuit: NotCircuit = new NotCircuit(this, -3, 0);
+        private ast: CircuitNode[]
 
         constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
                 this.canvas = canvas;
                 this.context = context;
+
+                this.ast = useComponentsStore().ast!! as unknown as CircuitNode[]
 
                 this.centerView(false);
 
@@ -284,7 +150,10 @@ export class CircuitRenderer {
                                 this.drawLine(xOffset - unitSize, yOffset + n * unitSize, xOffset + this.width + unitSize, yOffset + n * unitSize);
                 }
 
-                this.testCircuit.draw(this.context)
+                // Render the circuits
+                this.ast.forEach((node) => {
+                        node.element.draw(node.location, this, this.context)
+                })
 
                 // Draw the cursor
                 if (this.mousePresent) {

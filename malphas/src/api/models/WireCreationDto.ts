@@ -41,4 +41,9 @@ export interface WireCreationDto {
      * @memberof WireCreationDto
      */
     number_output: number;
+    /**
+     * @type {string}
+     * @memberof WireCreationDto
+     */
+    location: string;
 }

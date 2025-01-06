@@ -207,7 +207,7 @@ function openInEditor(scene: SceneDto) {
     </div>
   </div>
 
-  <div class="prose mx-10 mb-10" v-if="!sceneStore.loading">
+  <div class="prose mx-10 mb-10">
     <h1>Scenes</h1>
   </div>
 

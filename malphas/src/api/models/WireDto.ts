@@ -40,12 +40,12 @@ export interface WireDto {
      * @type {number}
      * @memberof WireDto
      */
-    amount_input: number;
+    number_input: number;
     /**
      * @type {number}
      * @memberof WireDto
      */
-    amount_output: number;
+    number_output: number;
     /**
      * @type {string}
      * @memberof WireDto

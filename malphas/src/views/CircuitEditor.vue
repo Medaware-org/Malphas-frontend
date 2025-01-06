@@ -4,17 +4,42 @@ import Viewport from "@/components/Viewport.vue";
 
 import {onMounted, ref} from 'vue';
 
-import {ArrowsPointingInIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, HomeIcon} from "@heroicons/vue/24/outline";
+import {
+  ArrowsPointingInIcon,
+  MagnifyingGlassMinusIcon,
+  MagnifyingGlassPlusIcon,
+  HomeIcon, ExclamationCircleIcon
+} from "@heroicons/vue/24/outline";
 import router from "@/router";
 import {useScenesStore} from "@/stores/scenes.ts";
+import {useComponentsStore} from "@/stores/components.ts";
+import LoadingIndicator from "@/components/LoadingIndicator.vue";
+import retrieveErrorDto from "@/services/errorParser.ts";
+import type {ErrorDto} from "@/api";
 
 const viewportRef = ref<InstanceType<typeof Viewport> | null>(null);
 const sceneStore = useScenesStore();
+const componentStore = useComponentsStore();
+
+const errorMessage = ref('')
+const errorOccurred = ref(false)
 
 onMounted(() => {
   // No scene is selected, so there's nothing the viewport can do
-  if (!sceneStore.getSelectedScene())
+  if (!sceneStore.getSelectedScene()) {
     router.push("/dash")
+    return
+  }
+
+  componentStore.loadWiresAndCircuits(sceneStore.getSelectedScene()!!, (err) => {
+    errorMessage.value = retrieveErrorDto(err).summary
+    errorOccurred.value = true
+  }, () => {
+    componentStore.buildAst((error: ErrorDto) => {
+      errorMessage.value = error.summary
+      errorOccurred.value = true
+    })
+  })
 })
 
 const recenterViewport = () => {
@@ -39,28 +64,43 @@ const returnToDashboard = () => {
 </script>
 
 <template>
-  <Viewport ref="viewportRef"></Viewport>
-  <div id="button-overlay">
-    <div class="m-8 pointer-events-auto xl:flex-col flex-row" id="button-container">
-      <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Return to Dashboard">
-        <button class="btn btn-primary btn-circle" @click="returnToDashboard">
-          <HomeIcon class="size-7 inline"></HomeIcon>
-        </button>
+  <div class="h-screen flex flex-col justify-center items-center" v-if="componentStore.isLoading()">
+    <LoadingIndicator></LoadingIndicator>
+  </div>
+
+  <div class="flex flex-row justify-center items-center mt-5 mb-5" v-if="errorOccurred && !componentStore.isLoading()">
+    <div class="w-1/2">
+      <div role="alert" class="alert alert-error">
+        <ExclamationCircleIcon class="size-6"></ExclamationCircleIcon>
+        <span>{{ errorMessage }}</span>
       </div>
-      <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Center View">
-        <button class="btn btn-primary btn-circle" @click="recenterViewport">
-          <ArrowsPointingInIcon class="size-7 inline"></ArrowsPointingInIcon>
-        </button>
-      </div>
-      <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Zoom In">
-        <button class="btn btn-primary btn-circle" @click="zoomInViewport">
-          <MagnifyingGlassPlusIcon class="size-7 inline"></MagnifyingGlassPlusIcon>
-        </button>
-      </div>
-      <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Zoom Out">
-        <button class="btn btn-primary btn-circle" @click="zoomOutViewport">
-          <MagnifyingGlassMinusIcon class="size-7 inline"></MagnifyingGlassMinusIcon>
-        </button>
+    </div>
+  </div>
+
+  <div v-if="!componentStore.isLoading() && !errorOccurred">
+    <Viewport ref="viewportRef"></Viewport>
+    <div id="button-overlay">
+      <div class="m-8 pointer-events-auto xl:flex-col flex-row" id="button-container">
+        <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Return to Dashboard">
+          <button class="btn btn-primary btn-circle" @click="returnToDashboard">
+            <HomeIcon class="size-7 inline"></HomeIcon>
+          </button>
+        </div>
+        <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Center View">
+          <button class="btn btn-primary btn-circle" @click="recenterViewport">
+            <ArrowsPointingInIcon class="size-7 inline"></ArrowsPointingInIcon>
+          </button>
+        </div>
+        <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Zoom In">
+          <button class="btn btn-primary btn-circle" @click="zoomInViewport">
+            <MagnifyingGlassPlusIcon class="size-7 inline"></MagnifyingGlassPlusIcon>
+          </button>
+        </div>
+        <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Zoom Out">
+          <button class="btn btn-primary btn-circle" @click="zoomOutViewport">
+            <MagnifyingGlassMinusIcon class="size-7 inline"></MagnifyingGlassMinusIcon>
+          </button>
+        </div>
       </div>
     </div>
   </div>

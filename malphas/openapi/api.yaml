@@ -271,7 +271,7 @@ components:
         parent_scene:
           type: string
           format: uuid
-        gateType:
+        gate_type:
           type: string
         location_x:
           type: int
@@ -282,7 +282,7 @@ components:
           format: uuid
       required:
         - parent_scene
-        - gateType
+        - gate_type
         - location_x
         - location_y
     circuitDto:
@@ -324,12 +324,15 @@ components:
           type: int
         number_output:
           type: int
+        location:
+          type: string
       required:
         - source_circuit
         - target_circuit
         - init_signal
         - number_input
         - number_output
+        - location
     wireDto:
       type: object
       properties:
@@ -344,9 +347,9 @@ components:
           format: uuid
         init_signal:
           type: boolean
-        amount_input:
+        number_input:
           type: int
-        amount_output:
+        number_output:
           type: int
         location:
           type: string
@@ -356,8 +359,8 @@ components:
         - target_circuit
         - location_y
         - init_signal
-        - amount_input
-        - amount_output
+        - number_input
+        - number_output
         - location
     errorDto:
       type: object
