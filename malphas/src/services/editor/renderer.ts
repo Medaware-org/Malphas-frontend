@@ -8,6 +8,9 @@ export class CircuitRenderer {
         static readonly GRIDLINES_COLOR = '#1A1A1A';
         static readonly CURSOR_COLOR = '#ecf0f1';
 
+        static readonly TMP_WIRE_COLOR_INVALID = '#e74c3c';
+        static readonly TMP_WIRE_COLOR_OK = '#2ecc71';
+
         static readonly MAX_ZOOM_LEVEL = 2.0;
         static readonly MIN_ZOOM_LEVEL = 0.02;
 
@@ -30,10 +33,18 @@ export class CircuitRenderer {
 
         private viewportDragging: boolean = false;
         private mousePosition: [number, number] = [0, 0];
+        private snappedMousePosition: [number, number] = [0, 0];
 
         private mousePresent: boolean = true
 
-        private ast: CircuitNode[]
+        private readonly ast: CircuitNode[]
+
+        //
+        // Stuff to keep track of the editing process
+        //
+
+        private wirePath: [number, number][] = []
+        private draggingNode: CircuitNode | undefined = undefined
 
         constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
                 this.canvas = canvas;
@@ -176,15 +187,66 @@ export class CircuitRenderer {
                         }
                 })
 
+                // Draw temporary wire
+                for (let i = 0; i < this.wirePath.length; i++) {
+                        this.context.strokeStyle = CircuitRenderer.TMP_WIRE_COLOR_INVALID;
+                        this.context.lineWidth = 5;
+
+                        if (i + 1 >= this.wirePath.length) {
+                                this.drawLine(...this.projectPoint(this.wirePath[i]), ...this.projectPoint(this.snappedMousePosition));
+                                break;
+                        }
+
+                        this.drawLine(...this.projectPoint(this.wirePath[i]), ...this.projectPoint(this.wirePath[i + 1]))
+                }
+
                 // Draw the cursor
                 if (this.mousePresent) {
-                        let snappedToGrid = this.unprojectPoint(this.mousePosition, true)
-                        let projected = this.projectPoint(snappedToGrid);
+                        let projected = this.projectPoint(this.snappedMousePosition);
                         this.context.lineWidth = 1;
                         this.context.strokeStyle = CircuitRenderer.CURSOR_COLOR;
                         this.drawLine(projected[0], projected[1] - this.gridUnit, projected[0], projected[1] + this.gridUnit);
                         this.drawLine(projected[0] - this.gridUnit, projected[1], projected[0] + this.gridUnit, projected[1]);
                 }
+        }
+
+        /**
+         * Check if a point is inside a given geometry
+         */
+        private rayCast(point: [number, number], geometry: [number, number][], worldOffset: [number, number]): boolean {
+                let inside = false
+                const [x, y] = point;
+                for (let i = 0; i < geometry.length; i++) {
+                        const [x1, y1] = geometry[i].map((coord, i) => coord + worldOffset[i]);
+                        const [x2, y2] = geometry[(i + 1) % geometry.length].map((coord, i) => coord + worldOffset[i]);
+
+                        // Check if the point's Y coordinate is within the Y range of the edge
+                        if (!((y1 > y) != (y2 > y)))
+                                continue;
+
+                        const intersection = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
+
+                        if (x < intersection)
+                                inside = !inside;
+                }
+                return inside
+        }
+
+        private startDragging() {
+                traverseAllAsts(this.ast, (node) => {
+                        if (this.draggingNode)
+                                return;
+
+                        if ('location' in node) {
+                                if (!node.element.isVisible(node.location, this))
+                                        return;
+
+                                if (this.rayCast(this.snappedMousePosition, node.element.geometry() as unknown as [number, number][], node.location)) {
+                                        this.draggingNode = node;
+                                        return;
+                                }
+                        }
+                })
         }
 
         private setupListeners() {
@@ -204,6 +266,18 @@ export class CircuitRenderer {
                         this.render();
                 })
 
+                window.addEventListener('keydown', (event: KeyboardEvent) => {
+                        if (event.key == "Escape") {
+                                this.wirePath = [];
+                                this.render();
+                        }
+                })
+
+                // The right mouse button is used for dragging
+                this.canvas.addEventListener('contextmenu', (event: UIEvent) => {
+                        event.preventDefault();
+                })
+
                 this.canvas.addEventListener('wheel', (event: WheelEvent) => {
                         this.zoom(event.deltaY > 0 ? 0.03 : -0.03)
                 })
@@ -211,6 +285,19 @@ export class CircuitRenderer {
                 this.canvas.addEventListener('mousedown', (event: MouseEvent) => {
                         this.viewportDragging = (event.button == 1);
                         this.mousePosition = [event.clientX, event.clientY];
+
+                        if (event.button == 2 && !this.draggingNode) {
+                                this.startDragging();
+                                return;
+                        }
+
+                        if ((event.button == 0 || event.button == 2) && this.draggingNode) {
+                                this.draggingNode = undefined; // Commit the changes!
+                                return;
+                        }
+
+                        if (event.button == 0)
+                                this.wirePath.push(this.snappedMousePosition)
                 });
 
                 this.canvas.addEventListener('mouseup', (event: MouseEvent) => {
@@ -230,6 +317,16 @@ export class CircuitRenderer {
 
                 this.canvas.addEventListener('mousemove', (event: MouseEvent) => {
                         const mousePosition: [number, number] = [event.clientX, event.clientY];
+                        const snapped = this.unprojectPoint(this.mousePosition, true)
+
+                        if (this.snappedMousePosition !== snapped)
+                                this.render();
+
+                        this.snappedMousePosition = snapped;
+
+                        if (this.draggingNode)
+                                this.draggingNode.location = this.snappedMousePosition
+
                         const delta = [mousePosition[0] - this.mousePosition[0], mousePosition[1] - this.mousePosition[1]];
                         this.mousePosition = mousePosition;
 
@@ -240,7 +337,6 @@ export class CircuitRenderer {
 
                         this.viewportPosition[0] += delta[0];
                         this.viewportPosition[1] += delta[1];
-                        this.render();
                 });
         }
 
