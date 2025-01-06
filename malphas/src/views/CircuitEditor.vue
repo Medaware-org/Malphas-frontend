@@ -8,7 +8,8 @@ import {
   ArrowsPointingInIcon,
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
-  HomeIcon, ExclamationCircleIcon
+  HomeIcon, ExclamationCircleIcon,
+  CheckCircleIcon, ExclamationTriangleIcon
 } from "@heroicons/vue/24/outline";
 import router from "@/router";
 import {useScenesStore} from "@/stores/scenes.ts";
@@ -79,7 +80,7 @@ const returnToDashboard = () => {
 
   <div v-if="!componentStore.isLoading() && !errorOccurred">
     <Viewport ref="viewportRef"></Viewport>
-    <div id="button-overlay">
+    <div id="generic-overlay">
       <div class="m-8 pointer-events-auto xl:flex-col flex-row" id="button-container">
         <div class="tooltip xl:tooltip-right tooltip-bottom" data-tip="Return to Dashboard">
           <button class="btn btn-primary btn-circle" @click="returnToDashboard">
@@ -103,15 +104,28 @@ const returnToDashboard = () => {
         </div>
       </div>
     </div>
+    <div class="generic-overlay">
+      <div class="flex justify-end text-white mr-10 my-10 text-lg">
+        <div v-if="componentStore.isAstAnalysable" class="text-success">
+          <CheckCircleIcon class="size-10 mr-5 inline"></CheckCircleIcon>
+          <span>Analysable</span>
+        </div>
+        <div v-if="!componentStore.isAstAnalysable" class="text-error">
+          <ExclamationTriangleIcon class="size-10 mr-5 inline"></ExclamationTriangleIcon>
+          <span>Floating Connections Present</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
-<style scoped>
-#button-overlay {
+<style scoped lang="scss">
+.generic-overlay {
   position: fixed;
   bottom: 0;
   left: 0;
   height: 100%;
+  width: 100%;
   pointer-events: none;
 }
 

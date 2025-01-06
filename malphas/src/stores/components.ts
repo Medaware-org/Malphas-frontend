@@ -10,6 +10,9 @@ export const useComponentsStore = defineStore("components", {
                 wires: [] as WireDto[],
                 circuits: [] as CircuitDto[],
                 ast: [] as CircuitNode[],
+                isAstAnalysable: false,
+                viewportScale: undefined as number | undefined,
+                viewportPosition: undefined as [number, number] | undefined
         }),
 
         actions: {
@@ -75,7 +78,7 @@ export const useComponentsStore = defineStore("components", {
                                 return;
                         }
 
-                        this.ast = tree!!
+                        [this.ast, this.isAstAnalysable] = tree!!
                 }
         }
 })

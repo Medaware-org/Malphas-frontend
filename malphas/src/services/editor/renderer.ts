@@ -1,4 +1,4 @@
-import {type CircuitNode, traverseAllAsts, traverseAst} from "@/services/editor/ast.ts";
+import {type CircuitNode, type WireNode, traverseAllAsts, traverseAst} from "@/services/editor/ast.ts";
 import {useComponentsStore} from "@/stores/components.ts";
 import {Api} from "@/services/api.ts";
 import {useScenesStore} from "@/stores/scenes.ts";
@@ -28,6 +28,18 @@ function createWire(src: CircuitNode, srcIndex: number, dst: CircuitNode, dstInd
                         number_output: dstIndex,
                         location: JSON.stringify(path)
                 }
+        }).subscribe({
+                next: () => {
+                        okCallback();
+                },
+                error: (err: any) => {
+                }
+        })
+}
+
+function deleteWire(node: WireNode, okCallback: () => void) {
+        Api.wire.deleteWire({
+                id: node.dto.id
         }).subscribe({
                 next: () => {
                         okCallback();
@@ -87,6 +99,10 @@ export class CircuitRenderer {
         private cachedInputs: [[number, number], CircuitNode, number][] = [];
         private cachedOutputs: [[number, number], CircuitNode, number][] = [];
 
+        private wireCache: [WireNode, [number, number][]][] = []
+
+        private components
+
         // Circuit, Index, Type
         private wireStart: [CircuitNode, number, 'input' | 'output'] | undefined = undefined
         private locationType: [CircuitNode | undefined, number, 'input' | 'output' | 'empty'] = [undefined, 0, 'empty'];
@@ -95,12 +111,56 @@ export class CircuitRenderer {
                 this.canvas = canvas;
                 this.context = context;
 
-                this.ast = useComponentsStore().ast!! as unknown as CircuitNode[]
+                this.components = useComponentsStore()
+                this.ast = this.components.ast!! as unknown as CircuitNode[]
 
-                this.centerView(false);
+                if (!this.components.viewportPosition)
+                        this.centerView(false);
+                else
+                        this.viewportPosition = this.components.viewportPosition
+
+                if (!this.components.viewportScale)
+                        this.viewportScale = 1.0
+                else
+                        this.viewportScale = this.components.viewportScale
 
                 this.setupListeners();
                 this.render();
+        }
+
+        private deleteWire() {
+                const bufferWidth = 10;
+
+                let toDelete: WireNode | undefined = undefined
+
+                for (const wire of this.wireCache) {
+                        if (toDelete)
+                                break;
+                        for (let i = 0; i < wire[1].length; i++) {
+                                if (i + 1 >= wire[1].length)
+                                        break;
+
+                                const current = wire[1][i]
+                                const next = wire[1][i + 1]
+
+                                const [x, y] = this.mousePosition;
+                                const [x1, y1] = this.projectPoint(current)
+                                const [x2, y2] = this.projectPoint(next)
+
+                                let d = Math.abs((y2 - y1) * x - (x2 - x1) * y + x2 * y1 - y2 * x1) / Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2));
+
+                                if (x >= Math.min(x1, x2) - bufferWidth && x <= Math.max(x1, x2) + bufferWidth &&
+                                        y >= Math.min(y1, y2) - bufferWidth && y <= Math.max(y1, y2) + bufferWidth) {
+                                        toDelete = wire[0]
+                                        break;
+                                }
+                        }
+                }
+
+                if (toDelete)
+                        deleteWire(toDelete, () => {
+                                this.rebuildAst()
+                        })
         }
 
         private rebuildAst() {
@@ -140,6 +200,8 @@ export class CircuitRenderer {
 
                 if (this.viewportScale < CircuitRenderer.MIN_ZOOM_LEVEL)
                         this.viewportScale = CircuitRenderer.MIN_ZOOM_LEVEL;
+
+                this.components.viewportScale = this.viewportScale;
 
                 this.render();
         }
@@ -261,6 +323,8 @@ export class CircuitRenderer {
                                         const next = this.projectPoint(node.path[i + 1])
                                         this.drawLine(...current, ...next)
                                 }
+
+                                this.wireCache.push([node, node.path])
                         }
                 })
 
@@ -413,6 +477,12 @@ export class CircuitRenderer {
                         if (event.key == "Escape") {
                                 this.wirePath = [];
                                 this.render();
+                                return;
+                        }
+
+                        if (event.key == "x") {
+                                this.deleteWire();
+                                return;
                         }
                 })
 
@@ -445,8 +515,10 @@ export class CircuitRenderer {
                 });
 
                 this.canvas.addEventListener('mouseup', (event: MouseEvent) => {
-                        if (event.button == 1)
+                        if (event.button == 1) {
                                 this.viewportDragging = false;
+                                this.components.viewportPosition = this.viewportPosition;
+                        }
                 });
 
                 this.canvas.addEventListener('mouseleave', (event: MouseEvent) => {

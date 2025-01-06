@@ -44,7 +44,7 @@ export interface CircuitNode {
 /**
  * Convert the DTOs into a coherent, renderable and analysable tree
  */
-export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode[] | undefined {
+export function buildTree(circuits: CircuitDto[], wires: WireDto[]): [CircuitNode[], boolean] | undefined {
         // Map for that sweet O(1) lookup complexity
         const circuitMap: Map<string, CircuitNode> =
                 new Map(circuits.map(circuit => [circuit.id, {
@@ -55,6 +55,8 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
                         type: circuitTypeFromString(circuit.gate_type),
                         element: circuitElements.get(circuitTypeFromString(circuit.gate_type))!!
                 }]));
+
+        let analysable = true;
 
         for (const wire of wires) {
                 const source = circuitMap.get(wire.source_circuit);
@@ -90,6 +92,7 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
                                 if (circuit.inputs.has(i))
                                         continue
                                 circuit.inputs.set(i, undefined)
+                                analysable = false;
                         }
                 }
 
@@ -98,6 +101,7 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
                                 if (circuit.outputs.has(i))
                                         continue
                                 circuit.outputs.set(i, undefined)
+                                analysable = false;
                         }
                 }
 
@@ -123,7 +127,7 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
 
         console.log("AST Construction successful.")
 
-        return outputs
+        return [outputs, analysable]
 }
 
 export function traverseAllAsts(tree: CircuitNode[], func: (node: CircuitNode | WireNode) => void) {
