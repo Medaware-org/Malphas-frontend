@@ -65,8 +65,8 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
                 new Map(circuits.map(circuit => [circuit.id, {
                         dto: circuit,
                         location: [circuit.location_x, circuit.location_y],
-                        inputs: new Map(), // TODO Update this
-                        outputs: new Map(), // TODO Update this
+                        inputs: new Map(),
+                        outputs: new Map(),
                         type: circuitTypeFromString(circuit.gate_type),
                         element: circuitElements.get(circuitTypeFromString(circuit.gate_type))!!
                 }]));
@@ -91,7 +91,35 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
                 destination.inputs.set(wire.number_output, node)
         })
 
-        // TODO Design check: Check if input and output indices are in range, check if all connections are populated
+        // Check if all connections are populated, check if input and output numbers are in range
+        Array.from(circuitMap.values()).forEach((circuit) => {
+                const element = circuit.element
+                const inputCount = circuit.inputs.size
+                const outputCount = circuit.outputs.size
+                const expectedInputCount = element.inputs().length
+                const expectedOutputCount = element.outputs().length
+
+                if (inputCount != expectedInputCount || outputCount != expectedOutputCount) {
+                        console.log(`AST Sanity check failed: The connections of circuit '${circuit.dto.id}' are not fully satisfied.`)
+                        return undefined
+                }
+
+                Array.from(circuit.outputs.keys()).forEach((key) => {
+                        if (key < 0 || key >= expectedOutputCount) {
+                                console.log(`AST Sanity check failed: An outbound connection to circuit '${circuit.dto.id}' is out of bounds (${key}).`)
+                                return undefined;
+                        }
+                })
+
+                Array.from(circuit.inputs.keys()).forEach((key) => {
+                        if (key < 0 || key >= expectedInputCount) {
+                                console.log(`AST Sanity check failed: An inbound connection to circuit '${circuit.dto.id}' is out of bounds (${key}).`)
+                                return undefined;
+                        }
+                })
+        })
+
+        console.log("AST Sanity check OK.")
 
         // Find the output nodes
         const outputs = Array.from(circuitMap.values()).filter(circuit => circuit.outputs.size == 0)
@@ -99,4 +127,28 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
         console.log("AST Construction successful.")
 
         return outputs
+}
+
+export function traverseAllAsts(tree: CircuitNode[], func: (node: CircuitNode | WireNode) => void) {
+        tree.forEach(node => traverseAst(node, func))
+}
+
+export function traverseAst(tree: CircuitNode | WireNode, func: (node: CircuitNode | WireNode) => void) {
+        /* CircuitNode */
+        if ('inputs' in tree && 'outputs' in tree) {
+                func(tree)
+                const inputs = tree.inputs; // We're traversing the tree from the outputs to the inputs (in reverse)
+                inputs.forEach((value, key) => {
+                        traverseAst(value, func);
+                })
+                return;
+        }
+
+        /* WireNode */
+        if ('source' in tree && 'target' in tree) {
+                func(tree)
+                const source = tree.source[1]; // `source` is the wire's `input`
+                traverseAst(source, func);
+                return;
+        }
 }

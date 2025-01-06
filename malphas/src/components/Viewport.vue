@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
 import {CircuitRenderer} from "@/services/editor/renderer.ts";
-import {useComponentsStore} from "@/stores/components.ts";
 
 const canvas = ref<HTMLCanvasElement | undefined>(undefined);
 const renderer = ref<CircuitRenderer | undefined>(undefined);

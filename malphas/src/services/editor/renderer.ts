@@ -1,6 +1,6 @@
 import {circuitElements, NotCircuit} from "@/services/editor/circuits.ts";
 import type {CircuitElement} from "@/services/editor/element.ts";
-import type {CircuitNode} from "@/services/editor/ast.ts";
+import {type CircuitNode, traverseAllAsts, traverseAst} from "@/services/editor/ast.ts";
 import {useComponentsStore} from "@/stores/components.ts";
 
 export class CircuitRenderer {
@@ -150,9 +150,30 @@ export class CircuitRenderer {
                                 this.drawLine(xOffset - unitSize, yOffset + n * unitSize, xOffset + this.width + unitSize, yOffset + n * unitSize);
                 }
 
-                // Render the circuits
-                this.ast.forEach((node) => {
-                        node.element.draw(node.location, this, this.context)
+                // Render the circuits and wiring
+                traverseAllAsts(this.ast, (node) => {
+                        if ('location' in node) {
+                                node.element.draw(node.location, this, this.context)
+                        }
+
+                        if ('source' in node && 'target' in node) {
+                                const source = node.source; // Source circuit
+                                const target = node.target; // Destination circuit
+
+                                const [sourceOutputNumber, sourceOutputCoords] = [source[0], source[1].element.outputs()];
+                                const [targetInputNumber, targetInputCoords] = [target[0], target[1].element.inputs()];
+
+                                const sourceCoord = sourceOutputCoords[sourceOutputNumber].map((coord, i) => coord + source[1].location[i])
+                                const targetCoord = targetInputCoords[targetInputNumber].map((coord, i) => coord + target[1].location[i])
+
+                                if (sourceCoord.length == 2 || targetCoord.length == 2) {
+                                        this.context.strokeStyle = 'white';
+                                        this.context.lineWidth = 5;
+
+                                        this.drawLine(...this.projectPoint(sourceCoord as unknown as [number, number]),
+                                                ...this.projectPoint(targetCoord as unknown as [number, number]))
+                                }
+                        }
                 })
 
                 // Draw the cursor
