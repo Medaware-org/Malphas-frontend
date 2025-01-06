@@ -19,7 +19,10 @@ export interface WireNode {
         target: [number, CircuitNode],
 
         /* The path that the wire takes (visually) */
-        path: [number, number][];
+        path: [number, number][],
+
+        /* The reuslt of the analysis */
+        result: boolean
 }
 
 export interface CircuitNode {
@@ -71,7 +74,8 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): [CircuitNod
                         dto: wire,
                         source: [wire.number_input, source],
                         target: [wire.number_output, destination],
-                        path: wire.location as unknown as [number, number][]
+                        path: wire.location as unknown as [number, number][],
+                        result: false
                 }
 
                 source.outputs.set(wire.number_input, node)

@@ -75,6 +75,9 @@ export class CircuitRenderer {
         static readonly TMP_WIRE_COLOR_INVALID = '#485460';
         static readonly TMP_WIRE_COLOR_OK = '#f6e58d';
 
+        static readonly WIRE_COLOR_HIGH = '#27ae60';
+        static readonly WIRE_COLOR_LOW = '#e74c3c';
+
         static readonly MAX_ZOOM_LEVEL = 2.0;
         static readonly MIN_ZOOM_LEVEL = 0.02;
 
@@ -337,6 +340,13 @@ export class CircuitRenderer {
                                 const targetCoord = targetInputCoords[targetInputNumber].map((coord, i) => coord + target[1].location[i])
 
                                 for (let i = 0; i < node.path.length; i++) {
+                                        if (node.result)
+                                                this.context.strokeStyle = CircuitRenderer.WIRE_COLOR_HIGH
+                                        else
+                                                this.context.strokeStyle = CircuitRenderer.WIRE_COLOR_LOW
+
+                                        this.context.lineWidth = 3
+
                                         const current = this.projectPoint(node.path[i])
                                         if (i == 0)
                                                 this.drawLine(...this.projectPoint(sourceCoord as unknown as [number, number]), ...current)
@@ -356,7 +366,7 @@ export class CircuitRenderer {
                 for (let i = 0; i < this.wirePath.length; i++) {
                         this.context.strokeStyle = this.isTmpWireValid ?
                                 CircuitRenderer.TMP_WIRE_COLOR_OK : CircuitRenderer.TMP_WIRE_COLOR_INVALID;
-                        this.context.lineWidth = 5;
+                        this.context.lineWidth = 3;
 
                         if (i + 1 >= this.wirePath.length) {
                                 this.drawLine(...this.projectPoint(this.wirePath[i]), ...this.projectPoint(this.snappedMousePosition));
