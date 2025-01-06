@@ -69,7 +69,7 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
                         dto: wire,
                         source: [wire.number_input, source],
                         target: [wire.number_output, destination],
-                        path: []
+                        path: wire.location as unknown as [number, number][]
                 }
 
                 source.outputs.set(wire.number_input, node)

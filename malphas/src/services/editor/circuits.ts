@@ -92,9 +92,34 @@ export class NotCircuit extends CircuitElement {
 
 }
 
+export class OrCircuit extends CircuitElement {
+        override geometry(): number[][] {
+                return [
+                        [0, 2],
+                        [3, 0],
+                        [0, -2]
+                ];
+        }
+
+        override inputs(): number[][] {
+                return [
+                        [0, 1],
+                        [0, -1]
+                ];
+        }
+
+        override outputs(): number[][] {
+                return [
+                        [3, 0]
+                ];
+        }
+
+}
+
 export const circuitElements = new Map<CircuitType, CircuitElement>([
         [CircuitType.INPUT, new InputCircuit()],
         [CircuitType.OUTPUT, new OutputCircuit()],
-        [CircuitType.NOT, new NotCircuit()]
+        [CircuitType.NOT, new NotCircuit()],
+        [CircuitType.OR, new OrCircuit()],
 ]);
 

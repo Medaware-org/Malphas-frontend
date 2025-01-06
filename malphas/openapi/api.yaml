@@ -415,7 +415,7 @@ components:
         number_output:
           type: int
         location:
-          type: string
+          type: any
       required:
         - id
         - source_circuit

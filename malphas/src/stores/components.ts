@@ -54,10 +54,12 @@ export const useComponentsStore = defineStore("components", {
                         })
                 },
 
-                buildAst(onError: (error: ErrorDto) => void = () => {}, then: () => void = () => {}): void {
+                buildAst(onError: (error: ErrorDto) => void = () => {
+                }, then: () => void = () => {
+                }): void {
                         this.ast = []
 
-                        if (this.circuits.length == 0 || this.wires.length == 0) {
+                        if (this.circuits.length == 0 && this.wires.length == 0) {
                                 console.log("This scene is empty. AST will not be built.")
                                 return;
                         }

@@ -250,12 +250,16 @@ export class CircuitRenderer {
                                 const sourceCoord = sourceOutputCoords[sourceOutputNumber].map((coord, i) => coord + source[1].location[i])
                                 const targetCoord = targetInputCoords[targetInputNumber].map((coord, i) => coord + target[1].location[i])
 
-                                if (sourceCoord.length == 2 || targetCoord.length == 2) {
-                                        this.context.strokeStyle = 'white';
-                                        this.context.lineWidth = 5;
-
-                                        this.drawLine(...this.projectPoint(sourceCoord as unknown as [number, number]),
-                                                ...this.projectPoint(targetCoord as unknown as [number, number]))
+                                for (let i = 0; i < node.path.length; i++) {
+                                        const current = this.projectPoint(node.path[i])
+                                        if (i == 0)
+                                                this.drawLine(...this.projectPoint(sourceCoord as unknown as [number, number]), ...current)
+                                        else if (i + 1 >= node.path.length) {
+                                                this.drawLine(...current, ...this.projectPoint(targetCoord as unknown as [number, number]))
+                                                break;
+                                        }
+                                        const next = this.projectPoint(node.path[i + 1])
+                                        this.drawLine(...current, ...next)
                                 }
                         }
                 })

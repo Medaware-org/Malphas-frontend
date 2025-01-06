@@ -11,6 +11,10 @@
  * Do not edit the class manually.
  */
 
+import type {
+    Any,
+} from './';
+
 /**
  * @export
  * @interface WireDto
@@ -47,8 +51,8 @@ export interface WireDto {
      */
     number_output: number;
     /**
-     * @type {string}
+     * @type {Any}
      * @memberof WireDto
      */
-    location: string;
+    location: Any;
 }
