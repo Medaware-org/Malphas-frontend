@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
 import {CircuitRenderer} from "@/services/editor/renderer.ts";
+import type {CircuitType} from "@/services/editor/circuits.ts";
 
 const canvas = ref<HTMLCanvasElement | undefined>(undefined);
 const renderer = ref<CircuitRenderer | undefined>(undefined);
@@ -21,6 +22,9 @@ defineExpose({
   },
   zoomOut: () => {
     renderer.value!!.zoomOut();
+  },
+  addGate(type: string) {
+    renderer.value!!.addGate(type);
   }
 })
 

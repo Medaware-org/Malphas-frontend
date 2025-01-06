@@ -2,6 +2,7 @@ import {type CircuitNode, type WireNode, traverseAllAsts, traverseAst} from "@/s
 import {useComponentsStore} from "@/stores/components.ts";
 import {Api} from "@/services/api.ts";
 import {useScenesStore} from "@/stores/scenes.ts";
+import type {SceneDto} from "@/api";
 
 function commitDrag(node: CircuitNode) {
         Api.circuit.updateCircuit({
@@ -40,6 +41,23 @@ function createWire(src: CircuitNode, srcIndex: number, dst: CircuitNode, dstInd
 function deleteWire(node: WireNode, okCallback: () => void) {
         Api.wire.deleteWire({
                 id: node.dto.id
+        }).subscribe({
+                next: () => {
+                        okCallback();
+                },
+                error: (err: any) => {
+                }
+        })
+}
+
+function createGate(scene: SceneDto, gateType: string, location: [number, number], okCallback: () => void) {
+        Api.circuit.postCircuit({
+                circuitCreationDto: {
+                        parent_scene: scene.id,
+                        gate_type: gateType,
+                        location_x: location[0],
+                        location_y: location[1]
+                }
         }).subscribe({
                 next: () => {
                         okCallback();
@@ -126,6 +144,12 @@ export class CircuitRenderer {
 
                 this.setupListeners();
                 this.render();
+        }
+
+        public addGate(type: string) {
+                createGate(useScenesStore().selectedScene!!, type, this.snappedMousePosition, () => {
+                        this.rebuildAst();
+                })
         }
 
         private deleteWire() {

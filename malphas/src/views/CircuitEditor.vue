@@ -6,10 +6,12 @@ import {onMounted, ref} from 'vue';
 
 import {
   ArrowsPointingInIcon,
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  HomeIcon,
   MagnifyingGlassMinusIcon,
-  MagnifyingGlassPlusIcon,
-  HomeIcon, ExclamationCircleIcon,
-  CheckCircleIcon, ExclamationTriangleIcon
+  MagnifyingGlassPlusIcon
 } from "@heroicons/vue/24/outline";
 import router from "@/router";
 import {useScenesStore} from "@/stores/scenes.ts";
@@ -17,6 +19,7 @@ import {useComponentsStore} from "@/stores/components.ts";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
 import retrieveErrorDto from "@/services/errorParser.ts";
 import type {ErrorDto} from "@/api";
+import {type CircuitType} from "@/services/editor/circuits.ts";
 
 const viewportRef = ref<InstanceType<typeof Viewport> | null>(null);
 const sceneStore = useScenesStore();
@@ -24,6 +27,7 @@ const componentStore = useComponentsStore();
 
 const errorMessage = ref('')
 const errorOccurred = ref(false)
+const addGateDialog = ref<HTMLDialogElement>()
 
 onMounted(() => {
   // No scene is selected, so there's nothing the viewport can do
@@ -40,6 +44,12 @@ onMounted(() => {
       errorMessage.value = error.summary
       errorOccurred.value = true
     })
+  })
+
+  window.addEventListener("keydown", (evt: KeyboardEvent) => {
+    if (evt.key == "a") {
+      addGateDialog.value!!.showModal();
+    }
   })
 })
 
@@ -62,9 +72,27 @@ const returnToDashboard = () => {
   router.push("/dash");
 };
 
+const addCircuit = (type: string) => {
+  addGateDialog.value!!.close();
+  viewportRef.value!!.addGate(type)
+}
+
 </script>
 
 <template>
+  <dialog id="add_gate" ref="addGateDialog" class="modal">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">Add Circuit</h3>
+      <div class="flex flex-row items-center justify-center w-full gap-3 mt-5 h-20">
+        <button class="btn btn-primary flex-1" @click="addCircuit('AN')">AND</button>
+        <button class="btn btn-primary flex-1" @click="addCircuit('OR')">OR</button>
+        <button class="btn btn-primary flex-1" @click="addCircuit('NOT')">NOT</button>
+        <button class="btn btn-primary flex-1" @click="addCircuit('INPUT')">Input</button>
+        <button class="btn btn-primary flex-1" @click="addCircuit('OUTPUT')">Output</button>
+      </div>
+    </div>
+  </dialog>
+
   <div class="h-screen flex flex-col justify-center items-center" v-if="componentStore.isLoading()">
     <LoadingIndicator></LoadingIndicator>
   </div>
