@@ -127,6 +127,21 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/circuitDto"
+    delete:
+      tags:
+        - Circuit
+      operationId: deleteCircuit
+      summary: Delete a circuit
+      description: Delete a circuit
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+            format: uuid
+      responses:
+          200:
+            description: OK
 
   /wire:
     post:
@@ -159,6 +174,21 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/wireDto"
+    delete:
+      tags:
+        - Wire
+      operationId: deleteWire
+      summary: Delete a wire
+      description: Delete a wire
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: OK
 
 components:
   schemas:
