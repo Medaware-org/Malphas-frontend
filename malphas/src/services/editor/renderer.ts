@@ -7,6 +7,19 @@ import {Api} from "@/services/api.ts";
 function commitDrag(node: CircuitNode, location: [number, number]) {
 }
 
+function createWire(src: CircuitNode, srcIndex: number, dst: CircuitNode, dstIndex: number, path: [number, number][]) {
+        Api.wire.postWire({
+                wireCreationDto: {
+                        source_circuit: src.dto.id,
+                        target_circuit: dst.dto.id,
+                        init_signal: false,
+                        number_input: srcIndex,
+                        number_output: dstIndex,
+                        location: JSON.stringify(path)
+                }
+        })
+}
+
 export class CircuitRenderer {
         static readonly BACKGROUND_COLOR = '#0A0A0A';
         static readonly GRIDLINES_COLOR = '#1A1A1A';

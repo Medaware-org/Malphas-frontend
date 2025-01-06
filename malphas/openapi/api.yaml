@@ -164,6 +164,27 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/circuitDto"
+    put:
+      tags:
+        - Circuit
+      operationId: updateCircuit
+      summary: Update a circuit
+      description: Update parameters of an existing circuit
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/circuitUpdateDto"
+      responses:
+        200:
+          description: OK
     delete:
       tags:
         - Circuit
@@ -339,6 +360,23 @@ components:
         - location_x
         - location_y
         - gate_type
+    circuitUpdateDto:
+      type: object
+      properties:
+        source_circuit:
+          type: string
+          format: uuid
+        target_circuit:
+          type: string
+          format: uuid
+        init_signal:
+          type: boolean
+        number_input:
+          type: integer
+        number_output:
+          type: integer
+        location:
+          type: string
     wireCreationDto:
       type: object
       properties:
