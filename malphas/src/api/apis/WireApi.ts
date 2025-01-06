@@ -14,11 +14,15 @@
 import type { Observable } from 'rxjs';
 import type { AjaxResponse } from 'rxjs/ajax';
 import { BaseAPI, throwIfNullOrUndefined } from '../runtime';
-import type { OperationOpts, HttpHeaders } from '../runtime';
+import type { OperationOpts, HttpHeaders, HttpQuery } from '../runtime';
 import type {
     WireCreationDto,
     WireDto,
 } from '../models';
+
+export interface ListAllWiresRequest {
+    scene: string;
+}
 
 export interface PostWireRequest {
     wireCreationDto: WireCreationDto;
@@ -30,15 +34,22 @@ export interface PostWireRequest {
 export class WireApi extends BaseAPI {
 
     /**
-     * Get all wires
+     * Get all wires in a given scene
      * Get all wires
      */
-    listAllWires(): Observable<Array<WireDto>>
-    listAllWires(opts?: OperationOpts): Observable<AjaxResponse<Array<WireDto>>>
-    listAllWires(opts?: OperationOpts): Observable<Array<WireDto> | AjaxResponse<Array<WireDto>>> {
+    listAllWires({ scene }: ListAllWiresRequest): Observable<Array<WireDto>>
+    listAllWires({ scene }: ListAllWiresRequest, opts?: OperationOpts): Observable<AjaxResponse<Array<WireDto>>>
+    listAllWires({ scene }: ListAllWiresRequest, opts?: OperationOpts): Observable<Array<WireDto> | AjaxResponse<Array<WireDto>>> {
+        throwIfNullOrUndefined(scene, 'scene', 'listAllWires');
+
+        const query: HttpQuery = { // required parameters are used directly since they are already checked by throwIfNullOrUndefined
+            'scene': scene,
+        };
+
         return this.request<Array<WireDto>>({
             url: '/wire',
             method: 'GET',
+            query,
         }, opts?.responseOpts);
     };
 

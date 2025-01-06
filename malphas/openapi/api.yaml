@@ -147,7 +147,14 @@ paths:
         - Circuit
       operationId: listAllCircuits
       summary: Get All Circuits
-      description: Get all circuits
+      description: Get all circuits in a given scene
+      parameters:
+        - in: query
+          name: scene
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         200:
           description: OK

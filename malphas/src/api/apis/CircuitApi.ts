@@ -14,11 +14,15 @@
 import type { Observable } from 'rxjs';
 import type { AjaxResponse } from 'rxjs/ajax';
 import { BaseAPI, throwIfNullOrUndefined } from '../runtime';
-import type { OperationOpts, HttpHeaders } from '../runtime';
+import type { OperationOpts, HttpHeaders, HttpQuery } from '../runtime';
 import type {
     CircuitCreationDto,
     CircuitDto,
 } from '../models';
+
+export interface ListAllCircuitsRequest {
+    scene: string;
+}
 
 export interface PostCircuitRequest {
     circuitCreationDto: CircuitCreationDto;
@@ -30,15 +34,22 @@ export interface PostCircuitRequest {
 export class CircuitApi extends BaseAPI {
 
     /**
-     * Get all circuits
+     * Get all circuits in a given scene
      * Get All Circuits
      */
-    listAllCircuits(): Observable<Array<CircuitDto>>
-    listAllCircuits(opts?: OperationOpts): Observable<AjaxResponse<Array<CircuitDto>>>
-    listAllCircuits(opts?: OperationOpts): Observable<Array<CircuitDto> | AjaxResponse<Array<CircuitDto>>> {
+    listAllCircuits({ scene }: ListAllCircuitsRequest): Observable<Array<CircuitDto>>
+    listAllCircuits({ scene }: ListAllCircuitsRequest, opts?: OperationOpts): Observable<AjaxResponse<Array<CircuitDto>>>
+    listAllCircuits({ scene }: ListAllCircuitsRequest, opts?: OperationOpts): Observable<Array<CircuitDto> | AjaxResponse<Array<CircuitDto>>> {
+        throwIfNullOrUndefined(scene, 'scene', 'listAllCircuits');
+
+        const query: HttpQuery = { // required parameters are used directly since they are already checked by throwIfNullOrUndefined
+            'scene': scene,
+        };
+
         return this.request<Array<CircuitDto>>({
             url: '/circuit',
             method: 'GET',
+            query,
         }, opts?.responseOpts);
     };
 
