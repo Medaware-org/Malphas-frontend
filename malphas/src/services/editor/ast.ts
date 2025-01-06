@@ -44,10 +44,10 @@ export interface CircuitNode {
         location: [number, number],
 
         /* Input numbers that connect to inbound wires */
-        inputs: Map<number, WireNode>,
+        inputs: Map<number, WireNode | undefined>,
 
         /* Output numbers that connect to outbound wires */
-        outputs: Map<number, WireNode>
+        outputs: Map<number, WireNode | undefined>
 
         /* Gate type; defines (visual and logical) characteristics */
         type: CircuitType,
@@ -99,9 +99,21 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
                 const expectedInputCount = element.inputs().length
                 const expectedOutputCount = element.outputs().length
 
-                if (inputCount != expectedInputCount || outputCount != expectedOutputCount) {
-                        console.log(`AST Sanity check failed: The connections of circuit '${circuit.dto.id}' are not fully satisfied.`)
-                        return undefined
+                // Explicitly mark inputs or outputs as floating
+                if (inputCount != expectedInputCount) {
+                        for (let i = 0; i < expectedInputCount; i++) {
+                                if (circuit.inputs.has(i))
+                                        continue
+                                circuit.inputs.set(i, undefined)
+                        }
+                }
+
+                if (outputCount != expectedOutputCount) {
+                        for (let i = 0; i < expectedOutputCount; i++) {
+                                if (circuit.outputs.has(i))
+                                        continue
+                                circuit.outputs.set(i, undefined)
+                        }
                 }
 
                 for (const key of circuit.outputs.keys()) {
@@ -139,7 +151,8 @@ export function traverseAst(tree: CircuitNode | WireNode, func: (node: CircuitNo
                 func(tree)
                 const inputs = tree.inputs; // We're traversing the tree from the outputs to the inputs (in reverse)
                 inputs.forEach((value, key) => {
-                        traverseAst(value, func);
+                        if (value)
+                                traverseAst(value, func);
                 })
                 return;
         }

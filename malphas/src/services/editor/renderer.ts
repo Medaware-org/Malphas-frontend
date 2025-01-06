@@ -8,8 +8,8 @@ export class CircuitRenderer {
         static readonly GRIDLINES_COLOR = '#1A1A1A';
         static readonly CURSOR_COLOR = '#ecf0f1';
 
-        static readonly TMP_WIRE_COLOR_INVALID = '#e74c3c';
-        static readonly TMP_WIRE_COLOR_OK = '#2ecc71';
+        static readonly TMP_WIRE_COLOR_INVALID = '#485460';
+        static readonly TMP_WIRE_COLOR_OK = '#f6e58d';
 
         static readonly MAX_ZOOM_LEVEL = 2.0;
         static readonly MIN_ZOOM_LEVEL = 0.02;
@@ -44,16 +44,18 @@ export class CircuitRenderer {
         //
 
         private wirePath: [number, number][] = []
-        private wireStartedOnOutput: boolean = false; // Describes the type of the starting point
+
         private isTmpWireValid = false;
 
         private draggingNode: CircuitNode | undefined = undefined
 
-        private cachedInputs: [number, number][] = [];
-        private cachedOutputs: [number, number][] = [];
+        // [CoordX, CoordY], Circuit, Index
+        private cachedInputs: [[number, number], CircuitNode, number][] = [];
+        private cachedOutputs: [[number, number], CircuitNode, number][] = [];
 
-        private locationType: 'input' | 'output' | 'empty' = 'empty';
-
+        // Circuit, Index, Type
+        private wireStart: [CircuitNode, number, 'input' | 'output'] | undefined = undefined
+        private locationType: [CircuitNode | undefined, number, 'input' | 'output' | 'empty'] = [undefined, 0, 'empty'];
 
         constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
                 this.canvas = canvas;
@@ -177,10 +179,20 @@ export class CircuitRenderer {
                 traverseAllAsts(this.ast, (node) => {
                         if ('location' in node) {
                                 node.element.draw(node.location, this, this.context)
-                                this.cachedInputs.push(...(node.element.inputs()
-                                        .map(point => [point[0] + node.location[0], point[1] + node.location[1]]) as unknown as [number, number][]))
-                                this.cachedOutputs.push(...(node.element.outputs()
-                                        .map(point => [point[0] + node.location[0], point[1] + node.location[1]]) as unknown as [number, number][]))
+                                node.element.inputs().forEach((input, index) => {
+                                        this.cachedInputs.push([
+                                                [input[0] + node.location[0], input[1] + node.location[1]],
+                                                node,
+                                                index
+                                        ])
+                                })
+                                node.element.outputs().forEach((output, index) => {
+                                        this.cachedOutputs.push([
+                                                [output[0] + node.location[0], output[1] + node.location[1]],
+                                                node,
+                                                index
+                                        ])
+                                })
                         }
 
                         if ('source' in node && 'target' in node) {
@@ -275,36 +287,40 @@ export class CircuitRenderer {
         }
 
         private updateLocationType() {
-                if (this.cachedInputs.filter((input) => this.comparePoint(input, this.snappedMousePosition)).length != 0) {
-                        this.locationType = 'input';
-                        return
+                let matchingInput = this.cachedInputs.find((input) => this.comparePoint(input[0], this.snappedMousePosition));
+                let matchingOutput = this.cachedOutputs.find((output) => this.comparePoint(output[0], this.snappedMousePosition));
+                if (matchingInput) {
+                        this.locationType = [matchingInput[1], matchingInput[2], 'input']
+                } else if (matchingOutput) {
+                        this.locationType = [matchingOutput[1], matchingOutput[2], 'output']
+                } else {
+                        this.locationType = [undefined, 0, 'empty']
                 }
-
-                if (this.cachedOutputs.filter((output) => this.comparePoint(output, this.snappedMousePosition)).length != 0) {
-                        this.locationType = 'output';
-                        return
-                }
-
-                this.locationType = 'empty';
         }
 
         private updateTmpWireValidity() {
-                this.isTmpWireValid = this.locationType == 'input' && this.wireStartedOnOutput
-                        || this.locationType == 'output' && !this.wireStartedOnOutput;
+                if (!this.wireStart) {
+                        this.isTmpWireValid = false
+                        return
+                }
+
+                this.isTmpWireValid = (this.locationType[2] == 'input' && this.wireStart[2] != 'input'
+                                || this.locationType[2] == 'output' && this.wireStart[2] != 'output')
+                        && this.wireStart[0] != this.locationType[0];
         }
 
         private layConnectionPoint() {
                 // A wire must start on a connection
                 if (this.wirePath.length == 0) {
-                        if (this.locationType == 'empty')
+                        if (this.locationType[2] == 'empty' || !this.locationType[0])
                                 return;
 
-                        this.wireStartedOnOutput = this.locationType == 'output';
+                        this.wireStart = [this.locationType[0], this.locationType[1], this.locationType[2]]
                         this.wirePath.push(this.snappedMousePosition);
                         return;
                 }
 
-                if (this.locationType == 'empty')
+                if (this.locationType[2] == 'empty')
                         this.wirePath.push(this.snappedMousePosition);
 
                 // A wire must end on the opposite type of connection
