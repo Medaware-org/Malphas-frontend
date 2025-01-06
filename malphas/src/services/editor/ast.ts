@@ -134,7 +134,7 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
         console.log("AST Sanity check OK.")
 
         // Find the output nodes
-        const outputs = Array.from(circuitMap.values()).filter(circuit => circuit.outputs.size == 0)
+        const outputs = Array.from(circuitMap.values()).filter(circuit => circuit.outputs.size == 0 || Array.from(circuit.outputs.values()).includes(undefined))
 
         console.log("AST Construction successful.")
 

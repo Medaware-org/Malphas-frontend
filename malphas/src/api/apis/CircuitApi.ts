@@ -20,6 +20,10 @@ import type {
     CircuitDto,
 } from '../models';
 
+export interface DeleteCircuitRequest {
+    id?: string;
+}
+
 export interface ListAllCircuitsRequest {
     scene: string;
 }
@@ -32,6 +36,25 @@ export interface PostCircuitRequest {
  * no description
  */
 export class CircuitApi extends BaseAPI {
+
+    /**
+     * Delete a circuit
+     * Delete a circuit
+     */
+    deleteCircuit({ id }: DeleteCircuitRequest): Observable<void>
+    deleteCircuit({ id }: DeleteCircuitRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>>
+    deleteCircuit({ id }: DeleteCircuitRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>> {
+
+        const query: HttpQuery = {};
+
+        if (id != null) { query['id'] = id; }
+
+        return this.request<void>({
+            url: '/circuit',
+            method: 'DELETE',
+            query,
+        }, opts?.responseOpts);
+    };
 
     /**
      * Get all circuits in a given scene

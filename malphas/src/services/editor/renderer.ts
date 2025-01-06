@@ -2,6 +2,10 @@ import {circuitElements, NotCircuit} from "@/services/editor/circuits.ts";
 import type {CircuitElement} from "@/services/editor/element.ts";
 import {type CircuitNode, traverseAllAsts, traverseAst} from "@/services/editor/ast.ts";
 import {useComponentsStore} from "@/stores/components.ts";
+import {Api} from "@/services/api.ts";
+
+function commitDrag(node: CircuitNode, location: [number, number]) {
+}
 
 export class CircuitRenderer {
         static readonly BACKGROUND_COLOR = '#0A0A0A';
@@ -367,7 +371,7 @@ export class CircuitRenderer {
                         this.viewportDragging = (event.button == 1);
                         this.mousePosition = [event.clientX, event.clientY];
 
-                        if (event.button == 2 && !this.draggingNode) {
+                        if (event.button == 2 && !this.draggingNode && this.wirePath.length == 0) {
                                 this.startDragging();
                                 return;
                         }

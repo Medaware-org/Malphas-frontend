@@ -20,6 +20,10 @@ import type {
     WireDto,
 } from '../models';
 
+export interface DeleteWireRequest {
+    id?: string;
+}
+
 export interface ListAllWiresRequest {
     scene: string;
 }
@@ -32,6 +36,25 @@ export interface PostWireRequest {
  * no description
  */
 export class WireApi extends BaseAPI {
+
+    /**
+     * Delete a wire
+     * Delete a wire
+     */
+    deleteWire({ id }: DeleteWireRequest): Observable<void>
+    deleteWire({ id }: DeleteWireRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>>
+    deleteWire({ id }: DeleteWireRequest, opts?: OperationOpts): Observable<void | AjaxResponse<void>> {
+
+        const query: HttpQuery = {};
+
+        if (id != null) { query['id'] = id; }
+
+        return this.request<void>({
+            url: '/wire',
+            method: 'DELETE',
+            query,
+        }, opts?.responseOpts);
+    };
 
     /**
      * Get all wires in a given scene
