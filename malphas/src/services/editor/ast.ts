@@ -3,22 +3,7 @@
  */
 import type {CircuitDto, WireDto} from "@/api";
 import type {CircuitElement} from "@/services/editor/element.ts";
-import {circuitElements} from "@/services/editor/circuits.ts";
-
-export enum CircuitType {
-        UNDEFINED = "UNDEFINED",
-
-        /* A fixed input value (0 ins, 1 out) */
-        INPUT = "INPUT",
-
-        /* A known output point (1 in, 0 outs) */
-        OUTPUT = "OUTPUT",
-
-        /* Regular logic gates */
-        AND = "AND",
-        OR = "OR",
-        NOT = "NOT"
-}
+import {circuitElements, CircuitType} from "@/services/editor/circuits.ts";
 
 function circuitTypeFromString(str: string): CircuitType {
         return CircuitType[str as keyof typeof CircuitType] || CircuitType.UNDEFINED;

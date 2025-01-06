@@ -1,5 +1,19 @@
 import {CircuitElement} from "@/services/editor/element.ts";
-import {CircuitType} from "@/services/editor/ast.ts";
+
+export enum CircuitType {
+        UNDEFINED = "UNDEFINED",
+
+        /* A fixed input value (0 ins, 1 out) */
+        INPUT = "INPUT",
+
+        /* A known output point (1 in, 0 outs) */
+        OUTPUT = "OUTPUT",
+
+        /* Regular logic gates */
+        AND = "AND",
+        OR = "OR",
+        NOT = "NOT"
+}
 
 export class InputCircuit extends CircuitElement {
         override geometry(): number[][] {
