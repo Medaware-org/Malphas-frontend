@@ -71,7 +71,7 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
                         element: circuitElements.get(circuitTypeFromString(circuit.gate_type))!!
                 }]));
 
-        wires.forEach(wire => {
+        for (const wire of wires) {
                 const source = circuitMap.get(wire.source_circuit);
                 const destination = circuitMap.get(wire.target_circuit);
 
@@ -89,10 +89,10 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
 
                 source.outputs.set(wire.number_input, node)
                 destination.inputs.set(wire.number_output, node)
-        })
+        }
 
         // Check if all connections are populated, check if input and output numbers are in range
-        Array.from(circuitMap.values()).forEach((circuit) => {
+        for (const circuit of circuitMap.values()) {
                 const element = circuit.element
                 const inputCount = circuit.inputs.size
                 const outputCount = circuit.outputs.size
@@ -104,20 +104,20 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): CircuitNode
                         return undefined
                 }
 
-                Array.from(circuit.outputs.keys()).forEach((key) => {
+                for (const key of circuit.outputs.keys()) {
                         if (key < 0 || key >= expectedOutputCount) {
                                 console.log(`AST Sanity check failed: An outbound connection to circuit '${circuit.dto.id}' is out of bounds (${key}).`)
                                 return undefined;
                         }
-                })
+                }
 
-                Array.from(circuit.inputs.keys()).forEach((key) => {
+                for (const key of circuit.inputs.keys()) {
                         if (key < 0 || key >= expectedInputCount) {
                                 console.log(`AST Sanity check failed: An inbound connection to circuit '${circuit.dto.id}' is out of bounds (${key}).`)
                                 return undefined;
                         }
-                })
-        })
+                }
+        }
 
         console.log("AST Sanity check OK.")
 
