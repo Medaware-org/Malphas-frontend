@@ -1,6 +1,7 @@
 import {CircuitRenderer} from "@/services/editor/renderer.ts";
 import {InputCircuit, OutputCircuit} from "@/services/editor/circuits.ts";
 import type {CircuitNode} from "@/services/editor/ast.ts";
+import {useComponentsStore} from "@/stores/components.ts";
 
 export abstract class CircuitElement {
         static readonly BACKGROUND_COLOR = '#37cdbe';
@@ -22,7 +23,7 @@ export abstract class CircuitElement {
 
         abstract outputs(): number[][];
 
-        abstract logic(inputs: boolean[]): boolean;
+        abstract logic(inputs: boolean[], renderer: CircuitRenderer, node: CircuitNode): boolean;
 
         drawGeometry(worldPosition: [number, number], renderer: CircuitRenderer, context: CanvasRenderingContext2D, result: boolean): void {
                 if (!this.isVisible(worldPosition, renderer))
@@ -35,10 +36,12 @@ export abstract class CircuitElement {
                         return;
 
                 if (this instanceof InputCircuit || this instanceof OutputCircuit) {
-                        if (result)
-                                context.fillStyle = CircuitElement.IO_COLOR_HIGH;
-                        else
-                                context.fillStyle = CircuitElement.IO_COLOR_LOW;
+                        if (useComponentsStore().isAstAnalysable) {
+                                if (result)
+                                        context.fillStyle = CircuitElement.IO_COLOR_HIGH;
+                                else
+                                        context.fillStyle = CircuitElement.IO_COLOR_LOW;
+                        } else context.fillStyle = CircuitRenderer.TMP_WIRE_COLOR_INVALID;
                         context.strokeStyle = CircuitElement.IO_CONTOUR_COLOR;
                 } else {
                         context.fillStyle = CircuitElement.BACKGROUND_COLOR;
@@ -129,18 +132,6 @@ export abstract class CircuitElement {
 
                         this.drawConnectionPoint(renderer, absoluteConn as unknown as [number, number])
                 })
-
-                for (let conn of [...this.inputs(), ...this.outputs()]) {
-                        if (conn.length != 2)
-                                continue;
-
-                        let absoluteConn = [
-                                conn[0] + worldPosition[0],
-                                conn[1] + worldPosition[1],
-                        ];
-
-                        this.drawConnectionPoint(renderer, absoluteConn as unknown as [number, number])
-                }
         }
 
         draw(node: CircuitNode, worldPosition: [number, number], renderer: CircuitRenderer, context: CanvasRenderingContext2D, result: boolean): void {

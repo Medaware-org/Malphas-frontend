@@ -1,4 +1,6 @@
 import {CircuitElement} from "@/services/editor/element.ts";
+import type {CircuitRenderer} from "@/services/editor/renderer.ts";
+import type {CircuitNode} from "@/services/editor/ast.ts";
 
 export enum CircuitType {
         UNDEFINED = "UNDEFINED",
@@ -38,8 +40,13 @@ export class InputCircuit extends CircuitElement {
                 ];
         }
 
-        logic(inputs: boolean[]): boolean {
-                return Math.random() < 0.5; // TODO TBD
+        override logic(inputs: boolean[], renderer: CircuitRenderer, node: CircuitNode): boolean {
+                const storedState = renderer.inputCircuitStates.get(node.dto.id)
+                if (storedState != undefined)
+                        return storedState
+                const newState = Math.random() < 0.5
+                renderer.inputCircuitStates.set(node.dto.id, newState)
+                return newState
         }
 }
 
@@ -58,7 +65,7 @@ export class OutputCircuit extends CircuitElement {
                 return [];
         }
 
-        logic(inputs: boolean[]): boolean {
+        override logic(inputs: boolean[], renderer: CircuitRenderer, node: CircuitNode): boolean {
                 return inputs[0]; // An output mirrors its inputs
         }
 }
@@ -84,7 +91,7 @@ export class NotCircuit extends CircuitElement {
                 ];
         }
 
-        logic(inputs: boolean[]): boolean {
+        override logic(inputs: boolean[], renderer: CircuitRenderer, node: CircuitNode): boolean {
                 return !inputs[0];
         }
 }
@@ -111,7 +118,7 @@ export class OrCircuit extends CircuitElement {
                 ];
         }
 
-        logic(inputs: boolean[]): boolean {
+        override logic(inputs: boolean[], renderer: CircuitRenderer, node: CircuitNode): boolean {
                 return inputs[0] || inputs[1];
         }
 }
@@ -138,7 +145,7 @@ export class AndCircuit extends CircuitElement {
                 ];
         }
 
-        logic(inputs: boolean[]): boolean {
+        override logic(inputs: boolean[], renderer: CircuitRenderer, node: CircuitNode): boolean {
                 return inputs[0] && inputs[1];
         }
 }

@@ -50,6 +50,18 @@ function deleteWire(node: WireNode, okCallback: () => void) {
         })
 }
 
+function deleteCircuit(node: CircuitNode, okCallback: () => void) {
+        Api.circuit.deleteCircuit({
+                id: node.dto.id
+        }).subscribe({
+                next: () => {
+                        okCallback();
+                },
+                error: (err: any) => {
+                }
+        })
+}
+
 function createGate(scene: SceneDto, gateType: string, location: [number, number], okCallback: () => void) {
         Api.circuit.postCircuit({
                 circuitCreationDto: {
@@ -120,6 +132,8 @@ export class CircuitRenderer {
         private cachedInputs: [[number, number], CircuitNode, number][] = [];
         private cachedOutputs: [[number, number], CircuitNode, number][] = [];
 
+        public readonly inputCircuitStates = new Map<string, boolean>();
+
         private wireCache: [WireNode, [number, number][]][] = []
 
         private components
@@ -154,7 +168,7 @@ export class CircuitRenderer {
                         return;
 
                 for (const ast of this.ast)
-                        runAnalysis(ast)
+                        runAnalysis(ast, this)
 
                 this.render()
         }
@@ -351,10 +365,12 @@ export class CircuitRenderer {
                                 const targetCoord = targetInputCoords[targetInputNumber].map((coord, i) => coord + target[1].location[i])
 
                                 for (let i = 0; i < node.path.length; i++) {
-                                        if (node.result)
-                                                this.context.strokeStyle = CircuitRenderer.WIRE_COLOR_HIGH
-                                        else
-                                                this.context.strokeStyle = CircuitRenderer.WIRE_COLOR_LOW
+                                        if (this.components.isAstAnalysable) {
+                                                if (node.result)
+                                                        this.context.strokeStyle = CircuitRenderer.WIRE_COLOR_HIGH
+                                                else
+                                                        this.context.strokeStyle = CircuitRenderer.WIRE_COLOR_LOW
+                                        } else this.context.strokeStyle = CircuitRenderer.TMP_WIRE_COLOR_INVALID;
 
                                         this.context.lineWidth = 3
 
@@ -419,11 +435,50 @@ export class CircuitRenderer {
                 return inside
         }
 
-        private startDragging() {
-                traverseAllAsts(this.ast, (node) => {
-                        if (this.draggingNode)
-                                return;
+        private deleteCircuit() {
+                if (this.draggingNode || this.wirePath.length !== 0)
+                        return;
 
+                traverseAllAsts(this.ast, (node) => {
+                        if ('location' in node) {
+                                if (!node.element.isVisible(node.location, this))
+                                        return;
+
+                                if (this.rayCast(this.snappedMousePosition, node.element.geometry() as unknown as [number, number][], node.location)) {
+                                        deleteCircuit(node, () => {
+                                                this.rebuildAst();
+                                        })
+                                        return;
+                                }
+                        }
+                })
+        }
+
+        private toggleInput() {
+                if (this.draggingNode || this.wirePath.length !== 0)
+                        return;
+
+                traverseAllAsts(this.ast, (node) => {
+                        if ('location' in node) {
+                                if (!node.element.isVisible(node.location, this))
+                                        return;
+
+                                if (this.rayCast(this.snappedMousePosition, node.element.geometry() as unknown as [number, number][], node.location)) {
+                                        const state = this.inputCircuitStates.get(node.dto.id)
+                                        this.inputCircuitStates.set(node.dto.id, !state)
+                                        console.log("Toggled")
+                                        this.analyse();
+                                        return;
+                                }
+                        }
+                })
+        }
+
+        private startDragging() {
+                if (this.draggingNode)
+                        return;
+
+                traverseAllAsts(this.ast, (node) => {
                         if ('location' in node) {
                                 if (!node.element.isVisible(node.location, this))
                                         return;
@@ -527,6 +582,16 @@ export class CircuitRenderer {
 
                         if (event.key == "x") {
                                 this.deleteWire();
+                                return;
+                        }
+
+                        if (event.key == "d") {
+                                this.deleteCircuit();
+                                return;
+                        }
+
+                        if (event.key == "t") {
+                                this.toggleInput();
                                 return;
                         }
                 })

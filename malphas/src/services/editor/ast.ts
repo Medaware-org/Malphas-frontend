@@ -4,6 +4,7 @@
 import type {CircuitDto, WireDto} from "@/api";
 import type {CircuitElement} from "@/services/editor/element.ts";
 import {circuitElements, CircuitType} from "@/services/editor/circuits.ts";
+import type {CircuitRenderer} from "@/services/editor/renderer.ts";
 
 function circuitTypeFromString(str: string): CircuitType {
         return CircuitType[str as keyof typeof CircuitType] || CircuitType.UNDEFINED;
@@ -163,20 +164,18 @@ export function traverseAst(tree: CircuitNode | WireNode, func: (node: CircuitNo
         }
 }
 
-export function runAnalysis(tree: CircuitNode, done: () => void = () => {}): boolean {
+export function runAnalysis(tree: CircuitNode, renderer: CircuitRenderer): boolean {
         let inputs: boolean[] = []
 
         for (const input of tree.inputs)
-                inputs.push(runAnalysis(input[1]!!.source[1]))
+                inputs.push(runAnalysis(input[1]!!.source[1], renderer))
 
-        const result = tree.element.logic(inputs)
+        const result = tree.element.logic(inputs, renderer, tree)
 
         tree.result = result;
 
         for (const output of tree.outputs.keys())
                 tree.outputs.get(output)!!.result = result
-
-        done()
 
         return result
 }
