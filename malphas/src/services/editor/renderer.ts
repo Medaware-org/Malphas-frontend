@@ -3,6 +3,7 @@ import {useComponentsStore} from "@/stores/components.ts";
 import {Api} from "@/services/api.ts";
 import {useScenesStore} from "@/stores/scenes.ts";
 import type {SceneDto} from "@/api";
+import type {CircuitElement} from "@/services/editor/element.ts";
 
 function commitDrag(node: CircuitNode) {
         Api.circuit.updateCircuit({
@@ -511,6 +512,22 @@ export class CircuitRenderer {
                 }
         }
 
+        private isConnectionOccupied(): boolean {
+                if (!this.locationType[0])
+                        return false
+
+                const circuit = this.locationType[0]
+                const type = this.locationType[2]
+
+                if (type == 'empty')
+                        return false
+
+                if (type == 'input')
+                        return circuit?.inputs.get(this.locationType[1]) !== undefined
+                else
+                        return circuit?.outputs.get(this.locationType[1]) !== undefined
+        }
+
         private updateTmpWireValidity() {
                 if (!this.wireStart) {
                         this.isTmpWireValid = false
@@ -519,13 +536,16 @@ export class CircuitRenderer {
 
                 this.isTmpWireValid = (this.locationType[2] == 'input' && this.wireStart[2] != 'input'
                                 || this.locationType[2] == 'output' && this.wireStart[2] != 'output')
-                        && this.wireStart[0] != this.locationType[0];
+                        && this.wireStart[0] != this.locationType[0] && !this.isConnectionOccupied();
         }
 
         private layConnectionPoint() {
                 // A wire must start on a connection
                 if (this.wirePath.length == 0) {
                         if (this.locationType[2] == 'empty' || !this.locationType[0])
+                                return;
+
+                        if (this.isConnectionOccupied())
                                 return;
 
                         this.wireStart = [this.locationType[0], this.locationType[1], this.locationType[2]]
