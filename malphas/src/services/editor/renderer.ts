@@ -323,7 +323,7 @@ export class CircuitRenderer {
 
                 traverseAllAsts(this.ast, (node) => {
                         if ('location' in node) {
-                                node.element.draw(node.location, this, this.context, node.result)
+                                node.element.draw(node, node.location, this, this.context, node.result)
                                 node.element.inputs().forEach((input, index) => {
                                         this.cachedInputs.push([
                                                 [input[0] + node.location[0], input[1] + node.location[1]],

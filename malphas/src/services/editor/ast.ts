@@ -166,9 +166,8 @@ export function traverseAst(tree: CircuitNode | WireNode, func: (node: CircuitNo
 export function runAnalysis(tree: CircuitNode, done: () => void = () => {}): boolean {
         let inputs: boolean[] = []
 
-        for (const input of tree.inputs) {
+        for (const input of tree.inputs)
                 inputs.push(runAnalysis(input[1]!!.source[1]))
-        }
 
         const result = tree.element.logic(inputs)
 

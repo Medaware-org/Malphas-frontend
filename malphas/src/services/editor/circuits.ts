@@ -148,6 +148,6 @@ export const circuitElements = new Map<CircuitType, CircuitElement>([
         [CircuitType.OUTPUT, new OutputCircuit()],
         [CircuitType.NOT, new NotCircuit()],
         [CircuitType.OR, new OrCircuit()],
-        [CircuitType.AND, new OrCircuit()]
+        [CircuitType.AND, new AndCircuit()]
 ]);
 

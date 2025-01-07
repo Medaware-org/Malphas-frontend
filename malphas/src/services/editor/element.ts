@@ -1,5 +1,6 @@
 import {CircuitRenderer} from "@/services/editor/renderer.ts";
 import {InputCircuit, OutputCircuit} from "@/services/editor/circuits.ts";
+import type {CircuitNode} from "@/services/editor/ast.ts";
 
 export abstract class CircuitElement {
         static readonly BACKGROUND_COLOR = '#37cdbe';
@@ -9,6 +10,7 @@ export abstract class CircuitElement {
         static readonly IO_COLOR_LOW = '#e74c3c';
 
         static readonly CONNECTION_COLOR = '#ecf0f1';
+        static readonly FLOATING_CONNECTION_COLOR = '#e74c3c';
         static readonly CONNECTION_SIZE = 0.15;
 
         constructor() {
@@ -81,12 +83,52 @@ export abstract class CircuitElement {
                 renderer.drawLine(vertLine[0][0], vertLine[0][1], vertLine[1][0], vertLine[1][1]);
         }
 
-        drawConnections(worldPosition: [number, number], renderer: CircuitRenderer, context: CanvasRenderingContext2D): void {
+        drawConnections(node: CircuitNode, worldPosition: [number, number], renderer: CircuitRenderer, context: CanvasRenderingContext2D): void {
                 if (!this.isVisible(worldPosition, renderer))
                         return;
 
                 context.strokeStyle = CircuitElement.CONNECTION_COLOR;
                 context.lineWidth = 5;
+
+                this.inputs().forEach((conn, i) => {
+                        if (conn.length != 2)
+                                return;
+
+                        if (node.inputs.get(i)) {
+                                context.strokeStyle = CircuitElement.CONNECTION_COLOR;
+                                context.lineWidth = 5;
+                        } else {
+                                context.strokeStyle = CircuitElement.FLOATING_CONNECTION_COLOR;
+                                context.lineWidth = 10;
+                        }
+
+                        let absoluteConn = [
+                                conn[0] + node.location[0],
+                                conn[1] + node.location[1],
+                        ];
+
+                        this.drawConnectionPoint(renderer, absoluteConn as unknown as [number, number])
+                })
+
+                this.outputs().forEach((conn, i) => {
+                        if (conn.length != 2)
+                                return;
+
+                        if (node.outputs.get(i)) {
+                                context.strokeStyle = CircuitElement.CONNECTION_COLOR;
+                                context.lineWidth = 5;
+                        } else {
+                                context.strokeStyle = CircuitElement.FLOATING_CONNECTION_COLOR;
+                                context.lineWidth = 10;
+                        }
+
+                        let absoluteConn = [
+                                conn[0] + node.location[0],
+                                conn[1] + node.location[1],
+                        ];
+
+                        this.drawConnectionPoint(renderer, absoluteConn as unknown as [number, number])
+                })
 
                 for (let conn of [...this.inputs(), ...this.outputs()]) {
                         if (conn.length != 2)
@@ -101,12 +143,12 @@ export abstract class CircuitElement {
                 }
         }
 
-        draw(worldPosition: [number, number], renderer: CircuitRenderer, context: CanvasRenderingContext2D, result: boolean): void {
+        draw(node: CircuitNode, worldPosition: [number, number], renderer: CircuitRenderer, context: CanvasRenderingContext2D, result: boolean): void {
                 if (!this.isVisible(worldPosition, renderer))
                         return;
 
                 this.drawGeometry(worldPosition, renderer, context, result);
-                this.drawConnections(worldPosition, renderer, context);
+                this.drawConnections(node, worldPosition, renderer, context);
         }
 
         isVisible(worldPosition: [number, number], renderer: CircuitRenderer): boolean {
