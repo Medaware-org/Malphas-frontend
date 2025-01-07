@@ -21,12 +21,15 @@ export interface WireNode {
         /* The path that the wire takes (visually) */
         path: [number, number][],
 
-        /* The reuslt of the analysis */
+        /* The result of the analysis */
         result: boolean
 }
 
 export interface CircuitNode {
         dto: CircuitDto,
+
+        /* The result of the analysis */
+        result: boolean
 
         /* World-space location of the circuit */
         location: [number, number],
@@ -56,7 +59,8 @@ export function buildTree(circuits: CircuitDto[], wires: WireDto[]): [CircuitNod
                         inputs: new Map(),
                         outputs: new Map(),
                         type: circuitTypeFromString(circuit.gate_type),
-                        element: circuitElements.get(circuitTypeFromString(circuit.gate_type))!!
+                        element: circuitElements.get(circuitTypeFromString(circuit.gate_type))!!,
+                        result: false
                 }]));
 
         let analysable = true;
@@ -157,4 +161,23 @@ export function traverseAst(tree: CircuitNode | WireNode, func: (node: CircuitNo
                 traverseAst(source, func);
                 return;
         }
+}
+
+export function runAnalysis(tree: CircuitNode, done: () => void = () => {}): boolean {
+        let inputs: boolean[] = []
+
+        for (const input of tree.inputs) {
+                inputs.push(runAnalysis(input[1]!!.source[1]))
+        }
+
+        const result = tree.element.logic(inputs)
+
+        tree.result = result;
+
+        for (const output of tree.outputs.keys())
+                tree.outputs.get(output)!!.result = result
+
+        done()
+
+        return result
 }

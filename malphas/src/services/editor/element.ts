@@ -1,8 +1,13 @@
 import {CircuitRenderer} from "@/services/editor/renderer.ts";
+import {InputCircuit, OutputCircuit} from "@/services/editor/circuits.ts";
 
 export abstract class CircuitElement {
         static readonly BACKGROUND_COLOR = '#37cdbe';
         static readonly CONTOUR_COLOR = '#27a89b';
+        static readonly IO_CONTOUR_COLOR = '#636e72'
+        static readonly IO_COLOR_HIGH = '#27ae60';
+        static readonly IO_COLOR_LOW = '#e74c3c';
+
         static readonly CONNECTION_COLOR = '#ecf0f1';
         static readonly CONNECTION_SIZE = 0.15;
 
@@ -15,7 +20,9 @@ export abstract class CircuitElement {
 
         abstract outputs(): number[][];
 
-        drawGeometry(worldPosition: [number, number], renderer: CircuitRenderer, context: CanvasRenderingContext2D): void {
+        abstract logic(inputs: boolean[]): boolean;
+
+        drawGeometry(worldPosition: [number, number], renderer: CircuitRenderer, context: CanvasRenderingContext2D, result: boolean): void {
                 if (!this.isVisible(worldPosition, renderer))
                         return;
 
@@ -25,8 +32,16 @@ export abstract class CircuitElement {
                 if (geometry.length < 3)
                         return;
 
-                context.fillStyle = CircuitElement.BACKGROUND_COLOR;
-                context.strokeStyle = CircuitElement.CONTOUR_COLOR;
+                if (this instanceof InputCircuit || this instanceof OutputCircuit) {
+                        if (result)
+                                context.fillStyle = CircuitElement.IO_COLOR_HIGH;
+                        else
+                                context.fillStyle = CircuitElement.IO_COLOR_LOW;
+                        context.strokeStyle = CircuitElement.IO_CONTOUR_COLOR;
+                } else {
+                        context.fillStyle = CircuitElement.BACKGROUND_COLOR;
+                        context.strokeStyle = CircuitElement.CONTOUR_COLOR;
+                }
                 context.lineWidth = 7;
 
                 context.beginPath();
@@ -86,11 +101,11 @@ export abstract class CircuitElement {
                 }
         }
 
-        draw(worldPosition: [number, number], renderer: CircuitRenderer, context: CanvasRenderingContext2D): void {
+        draw(worldPosition: [number, number], renderer: CircuitRenderer, context: CanvasRenderingContext2D, result: boolean): void {
                 if (!this.isVisible(worldPosition, renderer))
                         return;
 
-                this.drawGeometry(worldPosition, renderer, context);
+                this.drawGeometry(worldPosition, renderer, context, result);
                 this.drawConnections(worldPosition, renderer, context);
         }
 

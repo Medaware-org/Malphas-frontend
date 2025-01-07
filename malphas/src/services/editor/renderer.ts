@@ -1,4 +1,4 @@
-import {type CircuitNode, type WireNode, traverseAllAsts, traverseAst} from "@/services/editor/ast.ts";
+import {type CircuitNode, type WireNode, traverseAllAsts, traverseAst, runAnalysis} from "@/services/editor/ast.ts";
 import {useComponentsStore} from "@/stores/components.ts";
 import {Api} from "@/services/api.ts";
 import {useScenesStore} from "@/stores/scenes.ts";
@@ -146,7 +146,17 @@ export class CircuitRenderer {
                         this.viewportScale = this.components.viewportScale
 
                 this.setupListeners();
-                this.render();
+                this.analyse();
+        }
+
+        private analyse() {
+                if (!useComponentsStore().isAstAnalysable)
+                        return;
+
+                for (const ast of this.ast)
+                        runAnalysis(ast)
+
+                this.render()
         }
 
         public addGate(type: string) {
@@ -197,6 +207,7 @@ export class CircuitRenderer {
                         components.buildAst(() => {
                         }, () => {
                                 this.ast = components.ast as unknown as CircuitNode[];
+                                this.analyse();
                         });
                 })
         }
@@ -312,7 +323,7 @@ export class CircuitRenderer {
 
                 traverseAllAsts(this.ast, (node) => {
                         if ('location' in node) {
-                                node.element.draw(node.location, this, this.context)
+                                node.element.draw(node.location, this, this.context, node.result)
                                 node.element.inputs().forEach((input, index) => {
                                         this.cachedInputs.push([
                                                 [input[0] + node.location[0], input[1] + node.location[1]],

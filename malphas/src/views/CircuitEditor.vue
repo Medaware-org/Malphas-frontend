@@ -84,7 +84,7 @@ const addCircuit = (type: string) => {
     <div class="modal-box">
       <h3 class="text-lg font-bold">Add Circuit</h3>
       <div class="flex flex-row items-center justify-center w-full gap-3 mt-5 h-20">
-        <button class="btn btn-primary flex-1" @click="addCircuit('AN')">AND</button>
+        <button class="btn btn-primary flex-1" @click="addCircuit('AND')">AND</button>
         <button class="btn btn-primary flex-1" @click="addCircuit('OR')">OR</button>
         <button class="btn btn-primary flex-1" @click="addCircuit('NOT')">NOT</button>
         <button class="btn btn-primary flex-1" @click="addCircuit('INPUT')">Input</button>

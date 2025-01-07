@@ -15,19 +15,17 @@ export enum CircuitType {
         NOT = "NOT"
 }
 
+function ngon(n: number): number[][] {
+        const da = (2 * Math.PI) / n;
+        let arr = []
+        for (let i = 0; i < n; i++)
+                arr.push([Math.cos(da * i), Math.sin(da * i)])
+        return arr
+}
+
 export class InputCircuit extends CircuitElement {
         override geometry(): number[][] {
-                const da = (2 * Math.PI) / 8;
-                return [
-                        [Math.cos(da), Math.sin(da)],
-                        [Math.cos(da * 2), Math.sin(da * 2)],
-                        [Math.cos(da * 3), Math.sin(da * 3)],
-                        [Math.cos(da * 4), Math.sin(da * 4)],
-                        [Math.cos(da * 5), Math.sin(da * 5)],
-                        [Math.cos(da * 6), Math.sin(da * 6)],
-                        [Math.cos(da * 7), Math.sin(da * 7)],
-                        [Math.cos(da * 8), Math.sin(da * 8)]
-                ];
+                return ngon(20)
         }
 
         override inputs(): number[][] {
@@ -40,21 +38,14 @@ export class InputCircuit extends CircuitElement {
                 ];
         }
 
+        logic(inputs: boolean[]): boolean {
+                return Math.random() < 0.5; // TODO TBD
+        }
 }
 
 export class OutputCircuit extends CircuitElement {
         override geometry(): number[][] {
-                const da = (2 * Math.PI) / 8;
-                return [
-                        [Math.cos(da), Math.sin(da)],
-                        [Math.cos(da * 2), Math.sin(da * 2)],
-                        [Math.cos(da * 3), Math.sin(da * 3)],
-                        [Math.cos(da * 4), Math.sin(da * 4)],
-                        [Math.cos(da * 5), Math.sin(da * 5)],
-                        [Math.cos(da * 6), Math.sin(da * 6)],
-                        [Math.cos(da * 7), Math.sin(da * 7)],
-                        [Math.cos(da * 8), Math.sin(da * 8)]
-                ];
+                return ngon(20);
         }
 
         override inputs(): number[][] {
@@ -67,6 +58,9 @@ export class OutputCircuit extends CircuitElement {
                 return [];
         }
 
+        logic(inputs: boolean[]): boolean {
+                return inputs[0]; // An output mirrors its inputs
+        }
 }
 
 export class NotCircuit extends CircuitElement {
@@ -90,6 +84,9 @@ export class NotCircuit extends CircuitElement {
                 ];
         }
 
+        logic(inputs: boolean[]): boolean {
+                return !inputs[0];
+        }
 }
 
 export class OrCircuit extends CircuitElement {
@@ -114,6 +111,36 @@ export class OrCircuit extends CircuitElement {
                 ];
         }
 
+        logic(inputs: boolean[]): boolean {
+                return inputs[0] || inputs[1];
+        }
+}
+
+export class AndCircuit extends CircuitElement {
+        override geometry(): number[][] {
+                return [
+                        [0, 2],
+                        [3, 0],
+                        [0, -2]
+                ];
+        }
+
+        override inputs(): number[][] {
+                return [
+                        [0, 1],
+                        [0, -1]
+                ];
+        }
+
+        override outputs(): number[][] {
+                return [
+                        [3, 0]
+                ];
+        }
+
+        logic(inputs: boolean[]): boolean {
+                return inputs[0] && inputs[1];
+        }
 }
 
 export const circuitElements = new Map<CircuitType, CircuitElement>([
@@ -121,5 +148,6 @@ export const circuitElements = new Map<CircuitType, CircuitElement>([
         [CircuitType.OUTPUT, new OutputCircuit()],
         [CircuitType.NOT, new NotCircuit()],
         [CircuitType.OR, new OrCircuit()],
+        [CircuitType.AND, new OrCircuit()]
 ]);
 
