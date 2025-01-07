@@ -55,6 +55,19 @@ export class AuthenticationApi extends BaseAPI {
     };
 
     /**
+     * Invalidate the current session
+     * Log out
+     */
+    logout(): Observable<void>
+    logout(opts?: OperationOpts): Observable<void | AjaxResponse<void>>
+    logout(opts?: OperationOpts): Observable<void | AjaxResponse<void>> {
+        return this.request<void>({
+            url: '/logout',
+            method: 'POST',
+        }, opts?.responseOpts);
+    };
+
+    /**
      * Register a new user
      * register
      */

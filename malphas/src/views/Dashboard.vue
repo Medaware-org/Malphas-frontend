@@ -48,7 +48,14 @@ function clearError() {
 
 function signOut() {
   sessionStore.forgetToken();
-  router.push("/auth");
+  Api.auth.logout().subscribe({
+    next: () => {
+      router.push("/auth");
+    },
+    error: (err) => {
+      router.push("/auth");
+    }
+  })
 }
 
 const isCreateOrUpdateFormValid = computed(() => {
