@@ -3,6 +3,7 @@ import type {CircuitDto, ErrorDto, SceneDto, WireDto} from "@/api";
 import {Api} from "@/services/api.ts";
 import '@/services/editor/ast.ts';
 import {buildTree, type CircuitNode} from "@/services/editor/ast.ts";
+import {useScenesStore} from "@/stores/scenes.ts";
 
 export const useComponentsStore = defineStore("components", {
         state: () => ({
