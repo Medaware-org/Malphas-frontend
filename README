@@ -13,7 +13,7 @@ Building and executing:
 2. cd into /malphas/ and install npm packages inside that folder with `npm install`
 3. Inside the same folder run `npm run dev`
 
-After changing the openapi specs the npm `òpenapi-generate` command has to be run before executing the frontend.
+After changing the openapi specs the npm `openapi-generate` command has to be run before executing the frontend.
 
 Technologies and Tools
 ----------------------
