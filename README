@@ -7,6 +7,14 @@
                 | |
                 |_|
 
+
+Building and executing:
+1. Make sure the backend is running and functional.
+2. cd into /malphas/ and install npm packages inside that folder with `npm install`
+3. Inside the same folder run `npm run dev`
+
+After changing the openapi specs the npm `òpenapi-generate` command has to be run before executing the frontend.
+
 Technologies and Tools
 ----------------------
 The Vue Framework:      https://vuejs.org
