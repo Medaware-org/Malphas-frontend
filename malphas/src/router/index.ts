@@ -2,6 +2,7 @@ import {createRouter, createWebHistory} from 'vue-router'
 import CircuitEditor from "@/views/CircuitEditor.vue";
 import Dashboard from "@/views/Dashboard.vue";
 import Authentication from "@/views/Authentication.vue";
+import PathNotFound from "@/views/PathNotFound.vue";
 
 const router = createRouter({
         history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,7 +25,11 @@ const router = createRouter({
                         path: "/editor",
                         name: 'editor',
                         component: CircuitEditor
-                }
+                },
+                {
+                        path: '/:pathMatch(.*)*',
+                        component: PathNotFound
+                },
         ],
 })
 
