@@ -1,12 +1,4 @@
-  __  __       _       _
- |  \/  |     | |     | |
- | \  / | __ _| |_ __ | |__   __ _ ___
- | |\/| |/ _` | | '_ \| '_ \ / _` / __|
- | |  | | (_| | | |_) | | | | (_| \__ \
- |_|  |_|\__,_|_| .__/|_| |_|\__,_|___/
-                | |
-                |_|
-
+# Malphas Frontend
 
 Building and executing:
 1. Make sure the backend is running and functional.
@@ -24,9 +16,8 @@ Zoom with **Scrollwheel** or **Zoom** **Buttons**.
 Add wires with the **left mousebutton**.
 Edit or move components and wires with the **right mousebutton**.
 
-Technologies and Tools
-----------------------
-The Vue Framework:      https://vuejs.org
-DaisyUI:                https://daisyui.com
-Tailwind:               https://tailwindcss.com
-OpenAPI Generator:      https://openapi-generator.tech
+### Technologies and Tools
+(https://vuejs.org)[The Vue Framework]
+(https://daisyui.com)[DaisyUI]                
+(https://tailwindcss.com)[Tailwind]
+(https://openapi-generator.tech)[OpenAPI Generator]
