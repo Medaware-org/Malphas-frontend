@@ -9,15 +9,16 @@ For information for building refer to the readme in the "malphas" folder.
 After changing the openapi specs the npm `openapi-generate` command has to be run before executing the frontend.
 
 Controls of the Circuit Editor:
-A: **Add** new component
-T: **Toggle** Input state
-D: **Delete** component
-Zoom with **Scrollwheel** or **Zoom** **Buttons**.
-Add wires with the **left mousebutton**.
+- A: **Add** new component
+- T: **Toggle** Input state
+- D: **Delete** component
+
+Zoom with **Scrollwheel** or **Zoom** **Buttons**. <br>
+Add wires with the **left mousebutton**. <br>
 Edit or move components and wires with the **right mousebutton**.
 
 ### Technologies and Tools
-(https://vuejs.org)[The Vue Framework]
-(https://daisyui.com)[DaisyUI]                
-(https://tailwindcss.com)[Tailwind]
-(https://openapi-generator.tech)[OpenAPI Generator]
+[The Vue Framework](https://vuejs.org) <br>
+[DaisyUI](https://daisyui.com) <br>
+[Tailwind](https://tailwindcss.com) <br>
+[OpenAPI Generator](https://openapi-generator.tech) <br>
