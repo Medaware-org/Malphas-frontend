@@ -22,3 +22,4 @@ describe('Scene CRUD', () => {
         cy.contains('Log In') // Adjust this to match your page content
     })
 })
+

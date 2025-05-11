@@ -94,16 +94,16 @@ function cleanup() {
           <form @submit.prevent="act">
             <div class="flex flex-col justify-start gap-5">
               <div class="flex flex-row justify-start items-center gap-4">
-                <input type="radio" v-model="state" value="login" @change="cleanup" aria-label="Log In"
+                <input type="radio" data-cy="login" v-model="state" value="login" @change="cleanup" aria-label="Log In"
                        class="btn"
                        name="mode"
                        checked>
-                <input type="radio" v-model="state" value="register" @change="cleanup" aria-label="Register"
+                <input type="radio" data-cy="register" v-model="state" value="register" @change="cleanup" aria-label="Register"
                        class="btn"
                        name="mode">
               </div>
-              <input type="text" v-model="username" class="input input-bordered" placeholder="Username">
-              <input type="text" v-model="password" class="input input-bordered" placeholder="Password">
+              <input type="text" data-cy="username" v-model="username" class="input input-bordered" placeholder="Username">
+              <input type="text" data-cy="password" v-model="password" class="input input-bordered" placeholder="Password">
               <button class="btn btn-accent" type="submit">
                 {{ state == 'login' ? 'Log In' : 'Register' }}
               </button>
