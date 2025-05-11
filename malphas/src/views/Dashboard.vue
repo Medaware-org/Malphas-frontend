@@ -165,12 +165,12 @@ function openInEditor(scene: SceneDto) {
       <form method="dialog" @submit.prevent="createScene(true)">
         <h2 class="text-lg font-bold">Create Scene</h2>
         <div class="flex flex-col gap-5 mt-5">
-          <input type="text" class="input input-bordered" placeholder="Scene Name" v-model="newSceneName">
-          <input type="text" class="input input-bordered" placeholder="Description" v-model="newSceneDescription">
+          <input data-cy="create-scene-name-input" type="text" class="input input-bordered" placeholder="Scene Name" v-model="newSceneName">
+          <input data-cy="create-scene-desc-input" type="text" class="input input-bordered" placeholder="Description" v-model="newSceneDescription">
         </div>
         <div class="modal-action">
           <button class="btn btn-ghost" type="button" @click="createScene(false)">Cancel</button>
-          <button class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">Create</button>
+          <button data-cy="create-scene-button" class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">Create</button>
         </div>
       </form>
     </div>
@@ -182,12 +182,12 @@ function openInEditor(scene: SceneDto) {
       <form method="dialog" @submit.prevent="updateScene(true)">
         <h2 class="text-lg font-bold">Edit Scene Details</h2>
         <div class="flex flex-col gap-5 mt-5">
-          <input type="text" class="input input-bordered" placeholder="New Name" v-model="newSceneName">
-          <input type="text" class="input input-bordered" placeholder="New Description" v-model="newSceneDescription">
+          <input data-cy="update-scene-name-input" type="text" class="input input-bordered" placeholder="New Name" v-model="newSceneName">
+          <input data-cy="update-scene-desc-input" type="text" class="input input-bordered" placeholder="New Description" v-model="newSceneDescription">
         </div>
         <div class="modal-action">
           <button class="btn btn-ghost" type="button" @click="updateScene(false)">Cancel</button>
-          <button class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">Update</button>
+          <button data-cy="update-scene-button" class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">Update</button>
         </div>
       </form>
     </div>
@@ -200,7 +200,7 @@ function openInEditor(scene: SceneDto) {
       <span>Are you sure that you want to delete the scene <span class="italic">{{ targetScene?.name }}</span> and all of its internal circuitry?</span>
       <div class="modal-action">
         <button class="btn btn-ghost" type="button" @click="deleteScene(false)">Cancel</button>
-        <button class="btn" type="button" @click="deleteScene(true)">Delete</button>
+        <button class="btn" data-cy="confirm-delete-button" type="button" @click="deleteScene(true)">Delete</button>
       </div>
     </div>
   </dialog>
@@ -232,6 +232,7 @@ function openInEditor(scene: SceneDto) {
   <div class="flex flex-row lg:justify-start justify-center gap-10 mx-10 flex-wrap" v-if="!sceneStore.loading">
     <!-- Reload card -->
     <div
+        data-cy="reload-button"
         class="card min-w-72 h-48 select-none bg-neutral-900 hover:bg-neutral-700 border-slate-400 border-solid border new-scene-card"
         @click="reloadScenes">
       <div class="card-body flex items-center justify-center">
@@ -242,6 +243,7 @@ function openInEditor(scene: SceneDto) {
 
     <!-- The scene creation card -->
     <div
+        data-cy="new-scene-button"
         class="card min-w-72 h-48 select-none bg-neutral-900 hover:bg-neutral-700 border-slate-400 border-solid border new-scene-card"
         @click="showCreationDialog"
         v-if="!errorOccurred">
@@ -253,20 +255,21 @@ function openInEditor(scene: SceneDto) {
 
     <!-- Scene cards -->
     <div class="card min-w-72 h-48 bg-neutral-900 border-slate-400 border-solid border"
+         data-cy="scene-card"
          v-for="scene in sceneStore.scenes"
          v-if="!errorOccurred">
       <div class="card-body">
-        <h2 class="card-title">
+        <h2 data-cy="scene-card-title" class="card-title">
           {{ scene.name }}
         </h2>
         <p>{{ scene.description }}</p>
         <div class="card-actions mt-5">
-          <div class="tooltip flex-1 tooltip-bottom" data-tip="Delete Scene" @click="showDeleteDialog(scene)">
+          <div class="tooltip flex-1 tooltip-bottom" data-cy="delete-button" data-tip="Delete Scene" @click="showDeleteDialog(scene)">
             <button class="btn btn-error w-full btn-outline">
               <TrashIcon class="size-5 inline"></TrashIcon>
             </button>
           </div>
-          <div class="tooltip flex-1 tooltip-bottom" data-tip="Edit Details" @click="showUpdateDialog(scene)">
+          <div class="tooltip flex-1 tooltip-bottom" data-cy="edit-button" data-tip="Edit Details" @click="showUpdateDialog(scene)">
             <button class="btn btn-accent w-full btn-outline">
               <Cog8ToothIcon class="size-5 inline"></Cog8ToothIcon>
             </button>
