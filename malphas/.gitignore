@@ -28,3 +28,4 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+/cypress/downloads/downloads.htm
