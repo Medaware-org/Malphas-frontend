@@ -40,6 +40,6 @@ export class ServerConfiguration<T extends { [key: string]: string }> {
     }
 }
 
-const server1 = new ServerConfiguration<{  }>("http://localhost:1234", {  }, "Local development  server");
+const server1 = new ServerConfiguration<{  }>("http://localhost:3333", {  }, "Local development  server");
 
 export const servers = [server1];

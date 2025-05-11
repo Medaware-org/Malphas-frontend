@@ -4,7 +4,7 @@ info:
   description: Endpoint documentation for the Malphas Backend
   version: 1.0.0
 servers:
-  - url: http://localhost:1234
+  - url: http://localhost:3333
     description: Local development  server
 paths:
   /:
