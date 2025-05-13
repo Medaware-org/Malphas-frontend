@@ -1,16 +1,12 @@
-import {Configuration, AuthenticationApi, StatusApi, ScenesApi, type Middleware, WireApi, CircuitApi} from '@/api';
+import {Configuration, StatusApi, ScenesApi, type Middleware, WireApi, CircuitApi} from '@/api';
 import type {AjaxConfig, AjaxResponse} from 'rxjs/ajax';
-import {useSessionStore} from "@/stores/session.ts";
 
 class AuthorizationMiddleware implements Middleware {
         pre(request: AjaxConfig): AjaxConfig {
-                const token = useSessionStore().getToken();
-                if (!token)
-                        return request;
                 request.headers = {
-                        ...request.headers,
-                        "Authorization": `Bearer ${token}`
+                        ...request.headers
                 }
+                request.withCredentials = true
                 return request
         }
 
@@ -20,19 +16,17 @@ class AuthorizationMiddleware implements Middleware {
 }
 
 const apiConfig = new Configuration({
-        basePath: window.location.origin.replace("5173", "3333"), // TODO Change this for prod
+        basePath: window.location.origin.replace("5173", "8080"), // TODO Change this for prod
         middleware: [new AuthorizationMiddleware()]
 });
 
 const statusApi = new StatusApi(apiConfig)
-const authenticationApi = new AuthenticationApi(apiConfig)
 const sceneApi = new ScenesApi(apiConfig)
 const wireApi = new WireApi(apiConfig)
 const circuitApi = new CircuitApi(apiConfig)
 
 export const Api = {
         status: statusApi,
-        auth: authenticationApi,
         scene: sceneApi,
         wire: wireApi,
         circuit: circuitApi

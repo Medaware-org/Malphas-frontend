@@ -3,12 +3,21 @@ describe('Scene CRUD Flow', () => {
     const sceneDescription = 'A temporary test scene';
     const updatedName = 'Updated Scene';
     const updatedDescription = 'Updated description';
+    const username = 'testuser';
+    const password = 'testpass';
 
-    before(() => {
-        cy.visit('http://localhost:5173');
-    });
+    beforeEach(() => {
+  cy.session('user-session', () => {
+    cy.visit('/auth');
+    cy.get('input[placeholder="Username"]').type(username);
+    cy.get('input[placeholder="Password"]').type(password);
+    cy.get('button[type="submit"]').click();
+  });
+});
 
     it('creates a new scene', () => {
+	cy.visit('/dash');
+
         cy.get('[data-cy="new-scene-button"]').click();
 
         cy.get('[data-cy="scene-name-input"]').type(sceneName);

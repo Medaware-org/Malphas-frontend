@@ -27,6 +27,6 @@ describe('Login', () => {
         cy.get('[data-cy="password"]').type(password);
         cy.contains('Log In').click();
 
-        cy.contains('Dashboard').should('exist');
+	cy.url().should('include', '/dash');
     });
 });

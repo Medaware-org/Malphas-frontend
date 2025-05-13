@@ -9,7 +9,6 @@ import {
   Cog8ToothIcon, ExclamationCircleIcon
 } from '@heroicons/vue/24/outline';
 import {computed, ref} from 'vue';
-import {useSessionStore} from "@/stores/session.ts";
 import router from "@/router";
 import {onMounted} from "vue";
 import {useScenesStore} from "@/stores/scenes.ts";
@@ -23,7 +22,6 @@ onMounted(() => {
   reloadScenes();
 });
 
-const sessionStore = useSessionStore();
 const sceneStore = useScenesStore();
 
 const createSceneDialog = ref<HTMLDialogElement>()
@@ -47,15 +45,9 @@ function clearError() {
 }
 
 function signOut() {
-  sessionStore.forgetToken();
-  Api.auth.logout().subscribe({
-    next: () => {
-      router.push("/auth");
-    },
-    error: (err) => {
-      router.push("/auth");
-    }
-  })
+  // https://stackoverflow.com/questions/10593013/delete-cookie-by-name
+  document.cookie = 'malphas_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  router.push("/auth")
 }
 
 const isCreateOrUpdateFormValid = computed(() => {
@@ -165,12 +157,16 @@ function openInEditor(scene: SceneDto) {
       <form method="dialog" @submit.prevent="createScene(true)">
         <h2 class="text-lg font-bold">Create Scene</h2>
         <div class="flex flex-col gap-5 mt-5">
-          <input data-cy="create-scene-name-input" type="text" class="input input-bordered" placeholder="Scene Name" v-model="newSceneName">
-          <input data-cy="create-scene-desc-input" type="text" class="input input-bordered" placeholder="Description" v-model="newSceneDescription">
+          <input data-cy="create-scene-name-input" type="text" class="input input-bordered" placeholder="Scene Name"
+                 v-model="newSceneName">
+          <input data-cy="create-scene-desc-input" type="text" class="input input-bordered" placeholder="Description"
+                 v-model="newSceneDescription">
         </div>
         <div class="modal-action">
           <button class="btn btn-ghost" type="button" @click="createScene(false)">Cancel</button>
-          <button data-cy="create-scene-button" class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">Create</button>
+          <button data-cy="create-scene-button" class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">
+            Create
+          </button>
         </div>
       </form>
     </div>
@@ -182,12 +178,16 @@ function openInEditor(scene: SceneDto) {
       <form method="dialog" @submit.prevent="updateScene(true)">
         <h2 class="text-lg font-bold">Edit Scene Details</h2>
         <div class="flex flex-col gap-5 mt-5">
-          <input data-cy="update-scene-name-input" type="text" class="input input-bordered" placeholder="New Name" v-model="newSceneName">
-          <input data-cy="update-scene-desc-input" type="text" class="input input-bordered" placeholder="New Description" v-model="newSceneDescription">
+          <input data-cy="update-scene-name-input" type="text" class="input input-bordered" placeholder="New Name"
+                 v-model="newSceneName">
+          <input data-cy="update-scene-desc-input" type="text" class="input input-bordered"
+                 placeholder="New Description" v-model="newSceneDescription">
         </div>
         <div class="modal-action">
           <button class="btn btn-ghost" type="button" @click="updateScene(false)">Cancel</button>
-          <button data-cy="update-scene-button" class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">Update</button>
+          <button data-cy="update-scene-button" class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">
+            Update
+          </button>
         </div>
       </form>
     </div>
@@ -210,7 +210,8 @@ function openInEditor(scene: SceneDto) {
       <span class="px-3 text-slate-200 roboto-light text-xl select-none">Dashboard</span>
     </div>
     <div class="navbar-end">
-      <ArrowRightStartOnRectangleIcon data-cy="logout-icon" @click="signOut" class="size-5 mr-5 text-white"></ArrowRightStartOnRectangleIcon>
+      <ArrowRightStartOnRectangleIcon data-cy="logout-icon" @click="signOut"
+                                      class="size-5 mr-5 text-white"></ArrowRightStartOnRectangleIcon>
     </div>
   </div>
 
@@ -264,12 +265,14 @@ function openInEditor(scene: SceneDto) {
         </h2>
         <p>{{ scene.description }}</p>
         <div class="card-actions mt-5">
-          <div class="tooltip flex-1 tooltip-bottom" data-cy="delete-button" data-tip="Delete Scene" @click="showDeleteDialog(scene)">
+          <div class="tooltip flex-1 tooltip-bottom" data-cy="delete-button" data-tip="Delete Scene"
+               @click="showDeleteDialog(scene)">
             <button class="btn btn-error w-full btn-outline">
               <TrashIcon class="size-5 inline"></TrashIcon>
             </button>
           </div>
-          <div class="tooltip flex-1 tooltip-bottom" data-cy="edit-button" data-tip="Edit Details" @click="showUpdateDialog(scene)">
+          <div class="tooltip flex-1 tooltip-bottom" data-cy="edit-button" data-tip="Edit Details"
+               @click="showUpdateDialog(scene)">
             <button class="btn btn-accent w-full btn-outline">
               <Cog8ToothIcon class="size-5 inline"></Cog8ToothIcon>
             </button>

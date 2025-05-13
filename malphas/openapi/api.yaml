@@ -22,55 +22,6 @@ paths:
               schema:
                 type: string
 
-  /login:
-    post:
-      tags:
-        - Authentication
-      operationId: login
-      summary: Login
-      description: Attempt to log in with the given credentials
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/credentialsDto"
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/tokenDto"
-
-  /logout:
-    post:
-      tags:
-        - Authentication
-      operationId: logout
-      summary: Log out
-      description: Invalidate the current session
-      responses:
-        200:
-          description: OK
-
-  /register:
-    post:
-      tags:
-        - Authentication
-      operationId: register
-      summary: register
-      description: Register a new user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/credentialsDto"
-      responses:
-        200:
-          description: OK
-
   /scene:
     get:
       tags:
