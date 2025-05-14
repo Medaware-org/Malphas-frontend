@@ -35,7 +35,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
         const authenticated = document.cookie.includes('malphas_session=')
-        if (to.path !== '/dash' && authenticated)
+        if (to.path === '/auth' && authenticated)
                 next('/dash')
         else if (to.path !== '/auth' && !authenticated)
                 next('/auth')

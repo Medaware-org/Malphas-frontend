@@ -30,6 +30,7 @@ describe('Scene CRUD Flow', () => {
     });
 
     it('updates the created scene', () => {
+	cy.visit('/dash');
         cy.get('[data-cy="scene-card"]')
             .contains(sceneName)
             .parents('[data-cy="scene-card"]')
@@ -44,6 +45,7 @@ describe('Scene CRUD Flow', () => {
     });
 
     it('deletes the updated scene', () => {
+	cy.visit('/dash');
         cy.get('[data-cy="scene-card"]')
             .contains(updatedName)
             .parents('[data-cy="scene-card"]')
@@ -55,6 +57,7 @@ describe('Scene CRUD Flow', () => {
     });
 
     it('reloads the scene list', () => {
+	cy.visit('/dash');
         cy.get('[data-cy="reload-button"]').click();
         cy.get('[data-cy="scene-card-title"]').should('not.contain', updatedName);
     });
