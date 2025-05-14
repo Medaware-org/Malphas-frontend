@@ -436,16 +436,23 @@ export class CircuitRenderer {
                 return inside
         }
 
-        private deleteCircuit() {
+        private performCircuitDeletion() {
                 if (this.draggingNode || this.wirePath.length !== 0)
                         return;
 
+                let done = false
+
                 traverseAllAsts(this.ast, (node) => {
+                        if (done)
+                                return;
+
                         if ('location' in node) {
                                 if (!node.element.isVisible(node.location, this))
                                         return;
 
                                 if (this.rayCast(this.snappedMousePosition, node.element.geometry() as unknown as [number, number][], node.location)) {
+                                        console.log(`Deleting ${node.dto.id}`)
+                                        done = true
                                         deleteCircuit(node, () => {
                                                 this.rebuildAst();
                                         })
@@ -606,7 +613,7 @@ export class CircuitRenderer {
                         }
 
                         if (event.key == "d") {
-                                this.deleteCircuit();
+                                this.performCircuitDeletion();
                                 return;
                         }
 
