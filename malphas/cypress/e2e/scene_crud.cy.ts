@@ -48,6 +48,7 @@ describe('Scene CRUD Flow', () => {
         cy.get('[data-cy="scene-card-title"]').contains(sceneName).should('not.exist');
     });
 
+
     it('deletes the updated scene', () => {
         cy.get('[data-cy="scene-card"]')
             .contains(updatedName)
