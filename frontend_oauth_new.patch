@@ -1,0 +1,448 @@
+diff --git a/malphas/cypress/e2e/auth_flow.cy.ts b/malphas/cypress/e2e/auth_flow.cy.ts
+index ea94400..bf5b849 100644
+--- a/malphas/cypress/e2e/auth_flow.cy.ts
++++ b/malphas/cypress/e2e/auth_flow.cy.ts
+@@ -27,6 +27,6 @@ describe('Login', () => {
+         cy.get('[data-cy="password"]').type(password);
+         cy.contains('Log In').click();
+ 
+-        cy.contains('Dashboard').should('exist');
++	cy.url().should('include', '/dash');
+     });
+ });
+diff --git a/malphas/cypress/e2e/scene_crud.cy.ts b/malphas/cypress/e2e/scene_crud.cy.ts
+index 4f4124c..5ec501f 100644
+--- a/malphas/cypress/e2e/scene_crud.cy.ts
++++ b/malphas/cypress/e2e/scene_crud.cy.ts
+@@ -3,12 +3,21 @@ describe('Scene CRUD Flow', () => {
+     const sceneDescription = 'A temporary test scene';
+     const updatedName = 'Updated Scene';
+     const updatedDescription = 'Updated description';
+-
+-    before(() => {
+-        cy.visit('http://localhost:5173');
+-    });
++    const username = 'testuser';
++    const password = 'testpass';
++
++    beforeEach(() => {
++  cy.session('user-session', () => {
++    cy.visit('/auth');
++    cy.get('input[placeholder="Username"]').type(username);
++    cy.get('input[placeholder="Password"]').type(password);
++    cy.get('button[type="submit"]').click();
++  });
++});
+ 
+     it('creates a new scene', () => {
++	cy.visit('/dash');
++
+         cy.get('[data-cy="new-scene-button"]').click();
+ 
+         cy.get('[data-cy="scene-name-input"]').type(sceneName);
+diff --git a/malphas/openapi/api.yaml b/malphas/openapi/api.yaml
+index f94c322..dff357d 100644
+--- a/malphas/openapi/api.yaml
++++ b/malphas/openapi/api.yaml
+@@ -22,55 +22,6 @@ paths:
+               schema:
+                 type: string
+ 
+-  /login:
+-    post:
+-      tags:
+-        - Authentication
+-      operationId: login
+-      summary: Login
+-      description: Attempt to log in with the given credentials
+-      requestBody:
+-        required: true
+-        content:
+-          application/json:
+-            schema:
+-              $ref: "#/components/schemas/credentialsDto"
+-      responses:
+-        200:
+-          description: OK
+-          content:
+-            application/json:
+-              schema:
+-                $ref: "#/components/schemas/tokenDto"
+-
+-  /logout:
+-    post:
+-      tags:
+-        - Authentication
+-      operationId: logout
+-      summary: Log out
+-      description: Invalidate the current session
+-      responses:
+-        200:
+-          description: OK
+-
+-  /register:
+-    post:
+-      tags:
+-        - Authentication
+-      operationId: register
+-      summary: register
+-      description: Register a new user
+-      requestBody:
+-        required: true
+-        content:
+-          application/json:
+-            schema:
+-              $ref: "#/components/schemas/credentialsDto"
+-      responses:
+-        200:
+-          description: OK
+-
+   /scene:
+     get:
+       tags:
+diff --git a/malphas/src/api/.openapi-generator/FILES b/malphas/src/api/.openapi-generator/FILES
+index 483ef78..1f1133b 100644
+--- a/malphas/src/api/.openapi-generator/FILES
++++ b/malphas/src/api/.openapi-generator/FILES
+@@ -1,5 +1,4 @@
+ .gitignore
+-apis/AuthenticationApi.ts
+ apis/CircuitApi.ts
+ apis/ScenesApi.ts
+ apis/StatusApi.ts
+diff --git a/malphas/src/api/apis/index.ts b/malphas/src/api/apis/index.ts
+index ac0a3fc..696a0d2 100644
+--- a/malphas/src/api/apis/index.ts
++++ b/malphas/src/api/apis/index.ts
+@@ -1,4 +1,3 @@
+-export * from './AuthenticationApi';
+ export * from './CircuitApi';
+ export * from './ScenesApi';
+ export * from './StatusApi';
+diff --git a/malphas/src/router/index.ts b/malphas/src/router/index.ts
+index 36be92d..c3a8657 100644
+--- a/malphas/src/router/index.ts
++++ b/malphas/src/router/index.ts
+@@ -33,4 +33,14 @@ const router = createRouter({
+         ],
+ })
+ 
++router.beforeEach((to, from, next) => {
++        const authenticated = document.cookie.includes('malphas_session=')
++        if (to.path !== '/dash' && authenticated)
++                next('/dash')
++        else if (to.path !== '/auth' && !authenticated)
++                next('/auth')
++        else
++                next()
++})
++
+ export default router
+diff --git a/malphas/src/services/api.ts b/malphas/src/services/api.ts
+index 5c821a5..d631873 100644
+--- a/malphas/src/services/api.ts
++++ b/malphas/src/services/api.ts
+@@ -1,16 +1,12 @@
+-import {Configuration, AuthenticationApi, StatusApi, ScenesApi, type Middleware, WireApi, CircuitApi} from '@/api';
++import {Configuration, StatusApi, ScenesApi, type Middleware, WireApi, CircuitApi} from '@/api';
+ import type {AjaxConfig, AjaxResponse} from 'rxjs/ajax';
+-import {useSessionStore} from "@/stores/session.ts";
+ 
+ class AuthorizationMiddleware implements Middleware {
+         pre(request: AjaxConfig): AjaxConfig {
+-                const token = useSessionStore().getToken();
+-                if (!token)
+-                        return request;
+                 request.headers = {
+-                        ...request.headers,
+-                        "Authorization": `Bearer ${token}`
++                        ...request.headers
+                 }
++                request.withCredentials = true
+                 return request
+         }
+ 
+@@ -20,19 +16,17 @@ class AuthorizationMiddleware implements Middleware {
+ }
+ 
+ const apiConfig = new Configuration({
+-        basePath: window.location.origin.replace("5173", "3333"), // TODO Change this for prod
++        basePath: window.location.origin.replace("5173", "8080"), // TODO Change this for prod
+         middleware: [new AuthorizationMiddleware()]
+ });
+ 
+ const statusApi = new StatusApi(apiConfig)
+-const authenticationApi = new AuthenticationApi(apiConfig)
+ const sceneApi = new ScenesApi(apiConfig)
+ const wireApi = new WireApi(apiConfig)
+ const circuitApi = new CircuitApi(apiConfig)
+ 
+ export const Api = {
+         status: statusApi,
+-        auth: authenticationApi,
+         scene: sceneApi,
+         wire: wireApi,
+         circuit: circuitApi
+diff --git a/malphas/src/stores/session.ts b/malphas/src/stores/session.ts
+deleted file mode 100644
+index 6dae35c..0000000
+--- a/malphas/src/stores/session.ts
++++ /dev/null
+@@ -1,22 +0,0 @@
+-import {defineStore} from "pinia";
+-import {eraseToken, retrieveToken, storeToken} from "@/services/tokenService.ts";
+-
+-export const useSessionStore = defineStore("session", {
+-        state: () => ({token: retrieveToken()}),
+-
+-        actions: {
+-                setToken(newToken: string) {
+-                        this.token = newToken
+-                        storeToken(newToken)
+-                },
+-
+-                getToken(): string | undefined {
+-                        return this.token
+-                },
+-
+-                forgetToken() {
+-                        eraseToken();
+-                        this.token = undefined
+-                }
+-        }
+-})
+\ No newline at end of file
+diff --git a/malphas/src/views/Authentication.vue b/malphas/src/views/Authentication.vue
+index 1cf281f..de51cc6 100644
+--- a/malphas/src/views/Authentication.vue
++++ b/malphas/src/views/Authentication.vue
+@@ -1,88 +1,7 @@
+ <script setup lang="ts">
+ 
+-import {ref, computed, onMounted} from 'vue';
+-import {useSessionStore} from "@/stores/session.ts";
+-import router from "@/router";
+-import {Api} from "@/services/api.ts";
+-import {ExclamationCircleIcon} from '@heroicons/vue/24/outline';
+ import '@/services/errorParser.ts';
+-import type {TokenDto} from "@/api";
+-import retrieveErrorDto from "@/services/errorParser.ts";
+-
+-const sessionStore = useSessionStore()
+-
+-const errorOccurred = ref(false)
+-const errorMessage = ref('')
+-
+-const username = ref('')
+-const password = ref('')
+-
+-const state = ref<'login' | 'register'>('login')
+-
+-const isFormValid = computed(() => {
+-  return username.value.length > 0 && password.value.length > 0;
+-});
+-
+-onMounted(() => {
+-  if (sessionStore.getToken())
+-    router.push("/dash");
+-})
+-
+-function login() {
+-  errorOccurred.value = false;
+-
+-  Api.auth.login({
+-    credentialsDto: {
+-      username: username.value,
+-      password: password.value,
+-    }
+-  }).subscribe({
+-    next: (token: TokenDto) => {
+-      sessionStore.setToken(token.token)
+-      router.push("/dash")
+-    },
+-    error(err: any) {
+-      errorMessage.value = retrieveErrorDto(err).description;
+-      errorOccurred.value = true;
+-    }
+-  })
+-}
+-
+-function register() {
+-  errorOccurred.value = false;
+-
+-  Api.auth.register({
+-    credentialsDto: {
+-      username: username.value,
+-      password: password.value,
+-    }
+-  }).subscribe({
+-    next: () => {
+-      state.value = 'login'
+-      cleanup();
+-    },
+-    error(err: any) {
+-      errorMessage.value = retrieveErrorDto(err).description;
+-      errorOccurred.value = true;
+-    }
+-  })
+-}
+-
+-/**
+- * Log-In or Register based on the state
+- */
+-function act() {
+-  if (state.value == 'login')
+-    login();
+-  else
+-    register();
+-}
+-
+-function cleanup() {
+-  username.value = "";
+-  password.value = "";
+-  errorOccurred.value = false;
+-}
++import GoogleLoginButton from "@/components/GoogleLoginButton.vue";
+ 
+ </script>
+ 
+@@ -91,30 +10,11 @@ function cleanup() {
+     <div class="sm:w-full xl:w-1/4">
+       <div class="card bg-base-200 shadow-2xl">
+         <div class="card-body">
+-          <form @submit.prevent="act">
+-            <div class="flex flex-col justify-start gap-5">
+-              <div class="flex flex-row justify-start items-center gap-4">
+-                <input type="radio" data-cy="login" v-model="state" value="login" @change="cleanup" aria-label="Log In"
+-                       class="btn"
+-                       name="mode"
+-                       checked>
+-                <input type="radio" data-cy="register" v-model="state" value="register" @change="cleanup" aria-label="Register"
+-                       class="btn"
+-                       name="mode">
+-              </div>
+-              <input type="text" data-cy="username" v-model="username" class="input input-bordered" placeholder="Username">
+-              <input type="text" data-cy="password" v-model="password" class="input input-bordered" placeholder="Password">
+-              <button class="btn btn-accent" type="submit">
+-                {{ state == 'login' ? 'Log In' : 'Register' }}
+-              </button>
+-            </div>
+-          </form>
++          <h1>Authentication</h1>
++          <div class="mt-3"></div>
++          <GoogleLoginButton></GoogleLoginButton>
+         </div>
+       </div>
+-      <div role="alert" class="alert alert-error mt-5" v-if="errorOccurred">
+-        <ExclamationCircleIcon class="size-6"></ExclamationCircleIcon>
+-        <span>{{ errorMessage }}</span>
+-      </div>
+     </div>
+   </div>
+ </template>
+diff --git a/malphas/src/views/Dashboard.vue b/malphas/src/views/Dashboard.vue
+index 0df6083..3dabd7b 100644
+--- a/malphas/src/views/Dashboard.vue
++++ b/malphas/src/views/Dashboard.vue
+@@ -9,7 +9,6 @@ import {
+   Cog8ToothIcon, ExclamationCircleIcon
+ } from '@heroicons/vue/24/outline';
+ import {computed, ref} from 'vue';
+-import {useSessionStore} from "@/stores/session.ts";
+ import router from "@/router";
+ import {onMounted} from "vue";
+ import {useScenesStore} from "@/stores/scenes.ts";
+@@ -23,7 +22,6 @@ onMounted(() => {
+   reloadScenes();
+ });
+ 
+-const sessionStore = useSessionStore();
+ const sceneStore = useScenesStore();
+ 
+ const createSceneDialog = ref<HTMLDialogElement>()
+@@ -47,15 +45,9 @@ function clearError() {
+ }
+ 
+ function signOut() {
+-  sessionStore.forgetToken();
+-  Api.auth.logout().subscribe({
+-    next: () => {
+-      router.push("/auth");
+-    },
+-    error: (err) => {
+-      router.push("/auth");
+-    }
+-  })
++  // https://stackoverflow.com/questions/10593013/delete-cookie-by-name
++  document.cookie = 'malphas_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
++  router.push("/auth")
+ }
+ 
+ const isCreateOrUpdateFormValid = computed(() => {
+@@ -165,12 +157,16 @@ function openInEditor(scene: SceneDto) {
+       <form method="dialog" @submit.prevent="createScene(true)">
+         <h2 class="text-lg font-bold">Create Scene</h2>
+         <div class="flex flex-col gap-5 mt-5">
+-          <input data-cy="create-scene-name-input" type="text" class="input input-bordered" placeholder="Scene Name" v-model="newSceneName">
+-          <input data-cy="create-scene-desc-input" type="text" class="input input-bordered" placeholder="Description" v-model="newSceneDescription">
++          <input data-cy="create-scene-name-input" type="text" class="input input-bordered" placeholder="Scene Name"
++                 v-model="newSceneName">
++          <input data-cy="create-scene-desc-input" type="text" class="input input-bordered" placeholder="Description"
++                 v-model="newSceneDescription">
+         </div>
+         <div class="modal-action">
+           <button class="btn btn-ghost" type="button" @click="createScene(false)">Cancel</button>
+-          <button data-cy="create-scene-button" class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">Create</button>
++          <button data-cy="create-scene-button" class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">
++            Create
++          </button>
+         </div>
+       </form>
+     </div>
+@@ -182,12 +178,16 @@ function openInEditor(scene: SceneDto) {
+       <form method="dialog" @submit.prevent="updateScene(true)">
+         <h2 class="text-lg font-bold">Edit Scene Details</h2>
+         <div class="flex flex-col gap-5 mt-5">
+-          <input data-cy="update-scene-name-input" type="text" class="input input-bordered" placeholder="New Name" v-model="newSceneName">
+-          <input data-cy="update-scene-desc-input" type="text" class="input input-bordered" placeholder="New Description" v-model="newSceneDescription">
++          <input data-cy="update-scene-name-input" type="text" class="input input-bordered" placeholder="New Name"
++                 v-model="newSceneName">
++          <input data-cy="update-scene-desc-input" type="text" class="input input-bordered"
++                 placeholder="New Description" v-model="newSceneDescription">
+         </div>
+         <div class="modal-action">
+           <button class="btn btn-ghost" type="button" @click="updateScene(false)">Cancel</button>
+-          <button data-cy="update-scene-button" class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">Update</button>
++          <button data-cy="update-scene-button" class="btn" type="submit" :disabled="!isCreateOrUpdateFormValid">
++            Update
++          </button>
+         </div>
+       </form>
+     </div>
+@@ -210,7 +210,8 @@ function openInEditor(scene: SceneDto) {
+       <span class="px-3 text-slate-200 roboto-light text-xl select-none">Dashboard</span>
+     </div>
+     <div class="navbar-end">
+-      <ArrowRightStartOnRectangleIcon data-cy="logout-icon" @click="signOut" class="size-5 mr-5 text-white"></ArrowRightStartOnRectangleIcon>
++      <ArrowRightStartOnRectangleIcon data-cy="logout-icon" @click="signOut"
++                                      class="size-5 mr-5 text-white"></ArrowRightStartOnRectangleIcon>
+     </div>
+   </div>
+ 
+@@ -264,12 +265,14 @@ function openInEditor(scene: SceneDto) {
+         </h2>
+         <p>{{ scene.description }}</p>
+         <div class="card-actions mt-5">
+-          <div class="tooltip flex-1 tooltip-bottom" data-cy="delete-button" data-tip="Delete Scene" @click="showDeleteDialog(scene)">
++          <div class="tooltip flex-1 tooltip-bottom" data-cy="delete-button" data-tip="Delete Scene"
++               @click="showDeleteDialog(scene)">
+             <button class="btn btn-error w-full btn-outline">
+               <TrashIcon class="size-5 inline"></TrashIcon>
+             </button>
+           </div>
+-          <div class="tooltip flex-1 tooltip-bottom" data-cy="edit-button" data-tip="Edit Details" @click="showUpdateDialog(scene)">
++          <div class="tooltip flex-1 tooltip-bottom" data-cy="edit-button" data-tip="Edit Details"
++               @click="showUpdateDialog(scene)">
+             <button class="btn btn-accent w-full btn-outline">
+               <Cog8ToothIcon class="size-5 inline"></Cog8ToothIcon>
+             </button>
