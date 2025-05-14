@@ -30,14 +30,19 @@ describe('Scene CRUD Flow', () => {
     });
 
     it('updates the created scene', () => {
-        cy.get('[data-cy="scene-card"]')
-            .contains(sceneName)
-            .parents('[data-cy="scene-card"]')
-            .find('[data-cy="edit-button"]').click();
+        cy.get('[data-cy=scene-card]', { timeout: 1000 }).should('exist');
 
-        cy.get('[data-cy="edit-name-input"]').clear().type(updatedName);
-        cy.get('[data-cy="edit-desc-input"]').clear().type(updatedDescription);
-        cy.get('[data-cy="update-button"]').click();
+
+        cy.get('[data-cy=scene-card]')
+            .first()
+            .within(() => {
+                cy.get('[data-cy=edit-button]').click();
+            });
+
+
+        cy.get('[data-cy="update-name-input"]').clear().type(updatedName);
+        cy.get('[data-cy="update-desc-input"]').clear().type(updatedDescription);
+        cy.get('[data-cy="update-scene-button"]').click();
 
         cy.get('[data-cy="scene-card-title"]').contains(updatedName).should('exist');
         cy.get('[data-cy="scene-card-title"]').contains(sceneName).should('not.exist');
