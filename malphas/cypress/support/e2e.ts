@@ -19,7 +19,7 @@ import './commands'
 describe('Scene CRUD', () => {
     it('visits the home page', () => {
         cy.visit('/')
-        cy.contains('Log In') // Adjust this to match your page content
+        cy.contains('Authentication') // Adjust this to match your page content
     })
 })
 

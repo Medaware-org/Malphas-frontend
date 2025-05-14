@@ -3,15 +3,17 @@ describe('Scene CRUD Flow', () => {
     const sceneDescription = 'A temporary test scene';
     const updatedName = 'Updated Scene';
     const updatedDescription = 'Updated description';
-    const username = 'testuser';
-    const password = 'testpass';
 
     beforeEach(() => {
   cy.session('user-session', () => {
+      cy.setCookie('malphas_session', encodeURIComponent(JSON.stringify({
+          state: "CYPRESS_TESTING",
+          token: "",
+          userId: ""
+      })));
+
     cy.visit('/auth');
-    cy.get('input[placeholder="Username"]').type(username);
-    cy.get('input[placeholder="Password"]').type(password);
-    cy.get('button[type="submit"]').click();
+
   });
 });
 
@@ -20,9 +22,9 @@ describe('Scene CRUD Flow', () => {
 
         cy.get('[data-cy="new-scene-button"]').click();
 
-        cy.get('[data-cy="scene-name-input"]').type(sceneName);
-        cy.get('[data-cy="scene-desc-input"]').type(sceneDescription);
-        cy.get('[data-cy="create-button"]').click();
+        cy.get('[data-cy="create-scene-name-input"]').type(sceneName);
+        cy.get('[data-cy="create-scene-desc-input"]').type(sceneDescription);
+        cy.get('[data-cy="create-scene-button"]').click();
 
         cy.get('[data-cy="scene-card-title"]').contains(sceneName).should('exist');
     });
