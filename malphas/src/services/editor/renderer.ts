@@ -440,10 +440,10 @@ export class CircuitRenderer {
                 if (this.draggingNode || this.wirePath.length !== 0)
                         return;
 
-                let done = false
+                let deleteNode: CircuitNode | undefined = undefined
 
                 traverseAllAsts(this.ast, (node) => {
-                        if (done)
+                        if (deleteNode)
                                 return;
 
                         if ('location' in node) {
@@ -451,15 +451,20 @@ export class CircuitRenderer {
                                         return;
 
                                 if (this.rayCast(this.snappedMousePosition, node.element.geometry() as unknown as [number, number][], node.location)) {
-                                        console.log(`Deleting ${node.dto.id}`)
-                                        done = true
-                                        deleteCircuit(node, () => {
-                                                this.rebuildAst();
-                                        })
+                                        deleteNode = node
                                         return;
                                 }
                         }
                 })
+
+                if (!deleteNode)
+                        return;
+
+                deleteCircuit(deleteNode, () => {
+                        this.rebuildAst()
+                })
+
+                return;
         }
 
         private toggleInput() {
@@ -485,6 +490,17 @@ export class CircuitRenderer {
         private startDragging() {
                 if (this.draggingNode)
                         return;
+
+                traverseAllAsts(this.ast, (node) => {
+                        if ('location' in node) {
+                                if (!node.element.isVisible(node.location, this))
+                                        return;
+
+                                if (this.rayCast(this.snappedMousePosition, node.element.geometry() as unknown as [number, number][], node.location)) {
+                                        console.log(node.location)
+                                }
+                        }
+                })
 
                 traverseAllAsts(this.ast, (node) => {
                         if ('location' in node) {
